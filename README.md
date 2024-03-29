@@ -14,7 +14,7 @@ Code built with Visual Studio 2022 Communitiy Edition.
 
 ## Dependencies
 
-[UniversalHookX](https://github.com/bruhmoment21/UniversalHookX)
+This mod uses code from [UniversalHookX](https://github.com/bruhmoment21/UniversalHookX)
 
 ## Commercial usage/Hosting binaries
 
