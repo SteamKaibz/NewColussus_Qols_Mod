@@ -155,7 +155,7 @@ public:
 
     bool isModLoadBeep;
     bool isLogGameConsoleToLogFile;
-
+    bool isUseImgui;
     
    
 

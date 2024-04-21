@@ -1,4 +1,5 @@
 #include "idCvarManager.h"
+#include "../ModSettings/ModSettingsManager.h"
 
 //! from wold2Lib
 
@@ -136,7 +137,7 @@ bool idCvarManager::setModInitCvars() {
 
 	bool isError = false;
 
-
+	
 	isError =  !setCvar("in_unlockMouseInMenus", "0") || isError;
 	isError = !setCvar("view_showWorldMarkers", "1") || isError;
 
@@ -152,7 +153,12 @@ bool idCvarManager::setCriticalCvars() {
 	logInfo("enforcing critical Cvars");
 	bool isError = false;
 
-	isError = !setCvar("menu_showOptionForDevMenu", "1") || isError;
+	if(ModSettingsManager::getIsUseImgui()) {
+		isError = !setCvar("menu_showOptionForDevMenu", "1") || isError;
+	}
+	else {
+		isError = !setCvar("menu_showOptionForDevMenu", "0") || isError;
+	}
 	isError = !setCvar("g_showHud", "1") || isError;
 	isError = !setCvar("com_skipGameRenderView", "0") || isError;
 	isError = !setCvar("r_skipGuis", "0") || isError;

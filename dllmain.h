@@ -197,18 +197,30 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 
 	static bool last_bShowMenu = false;
 	static shellScreen_t lastMenuIndex = shellScreen_t::NUM_SHELL_SCREENS;
+	static bool isFirtTimeLogImguiUsage = true;
+
+	if (!ModSettingsManager::getIsUseImgui()) {
+		if (isFirtTimeLogImguiUsage) {
+			isFirtTimeLogImguiUsage = false;
+			logWarn("idMenuManager_Shell_Update_Hook: user is not using Imgui, mod settings UI is disabled.");
+		}
+		return p_idMenuManager_Shell_Update_t(idMenuManager_Shell_a1, a2);
+	}
+
+
 
 	ImGuiManager::setIsInitFlag(true);
 
 
 	MenuStateManager::acquireidMenuManager_ShellPtr(idMenuManager_Shell_a1);
 
-	timescaleManager::setDefaultSpeed();
-	
-	idCvarManager::setCvar("menu_showOptionForDevMenu", "1");     
+	timescaleManager::setDefaultSpeed();	
+	 
 
 	shellScreen_t currentMenuIndex = *(shellScreen_t*)(idMenuManager_Shell_a1 + 0x30);
 
+
+	idCvarManager::setCvar("menu_showOptionForDevMenu", "1");
 
 	if (currentMenuIndex == SHELL_SCREEN_DEV) {            		
 		idCvarManager::setCvar("in_unlockMouseInMenus", "1");       

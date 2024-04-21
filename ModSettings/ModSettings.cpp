@@ -177,5 +177,5 @@ void ModSettings::initializeMembers() {
 
     isModLoadBeep = false;
     isLogGameConsoleToLogFile = false;
-
+    isUseImgui = true;
 }

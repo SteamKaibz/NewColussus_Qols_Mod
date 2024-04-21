@@ -26,15 +26,17 @@
 	 return m_isOneInitAttempt;
  }
 
- void ImGuiManager::toggleForceOpenMenuState() {
-	 m_isUserForceOpenModMenu = !m_isUserForceOpenModMenu;
-	 logInfo("toggleForceOpenMenuState: setting m_isUserForceOpenModMenu to: %d", m_isUserForceOpenModMenu);
- }
 
 
- bool ImGuiManager::isUserForceOpenModMenu() {
-	 return m_isUserForceOpenModMenu;
- }
+ //void ImGuiManager::toggleForceOpenMenuState() {
+	// m_isUserForceOpenModMenu = !m_isUserForceOpenModMenu;
+	// logInfo("toggleForceOpenMenuState: setting m_isUserForceOpenModMenu to: %d", m_isUserForceOpenModMenu);
+ //}
+
+
+ //bool ImGuiManager::isUserForceOpenModMenu() {
+	// return m_isUserForceOpenModMenu;
+ //}
 
  //bool ImGuiManager::isInitialized() {
    // return m_isInitialized;

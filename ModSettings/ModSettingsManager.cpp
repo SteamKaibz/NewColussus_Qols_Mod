@@ -13,7 +13,6 @@ void ModSettingsManager::updateCvars() {
 	}	
 
 	idCvarManager::setCvar("view_showWorldMarkers", "1");
-
 	idCvarManager::setCvar("view_kickAmplitude_max", std::to_string(m_modSettings.viewKickMax));     
 	idCvarManager::setCvar("r_blurGaussian", std::to_string(m_modSettings.isEnableGaussianBlur));
 	idCvarManager::setCvar("r_skipFog", std::to_string(m_modSettings.isSkipFog));
@@ -145,6 +144,23 @@ float ModSettingsManager::gethudFrameHeightMul() {
 bool ModSettingsManager::getIsLogGameConsoleToLogFile()
 {
 	return m_modSettings.isLogGameConsoleToLogFile;
+}
+
+
+bool ModSettingsManager::getIsUseImgui() {
+	static bool isFirstTime = true;
+
+
+	//qsdflogInfo("ModSettingsManager::getIsUseImgui: m_modSettings.isUseImgui: %d", m_modSettings.isUseImgui);
+
+	if (isFirstTime) {
+		if (!m_modSettings.isUseImgui) {
+			logWarn("user has disabled the mod gui in the json file, imgui will not be initialized. If you wanto re-enable the mod UI interface, close the game and delete the KaibzMod in the game folder or edit the json file again manually");
+		}
+		isFirstTime = false;
+	}
+
+	return m_modSettings.isUseImgui;
 }
 
 //void ModSettingsManager::setIsLogGameConsoleToLogFile(bool isLogToFile)

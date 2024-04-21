@@ -114,6 +114,7 @@ public:
     static float gethudFrameHeightMul();
 
     static bool getIsLogGameConsoleToLogFile();
+    static bool getIsUseImgui();
     //static void setIsLogGameConsoleToLogFile(bool isLogToFile);
     
 };

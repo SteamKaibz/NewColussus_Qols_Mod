@@ -7,9 +7,7 @@
 
 namespace ig = ImGui;
 
-namespace Menu {
-    
-
+namespace Menu {  
 
 
     void InitializeContext(HWND hwnd) {
@@ -304,6 +302,7 @@ namespace Menu {
 
                 modSettings.isModLoadBeep = j.value("isModLoadBeep", false);
                 modSettings.isLogGameConsoleToLogFile = j.value("isLogGameConsoleToLogFile", false);
+                modSettings.isUseImgui = j.value("isUseImgui", true);
 
 
             }
@@ -433,6 +432,7 @@ namespace Menu {
 
         j["isModLoadBeep"] = modSettings.isModLoadBeep;
         j["isLogGameConsoleToLogFile"] = modSettings.isLogGameConsoleToLogFile;
+        j["isUseImgui"] = modSettings.isUseImgui;
 
 
         std::ofstream file(filePath);

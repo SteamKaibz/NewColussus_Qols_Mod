@@ -59,9 +59,9 @@ public:
 
 	static bool isPreviousInitAttempt();
 
-	static void toggleForceOpenMenuState();
+	//static void toggleForceOpenMenuState();
 
-	static bool isUserForceOpenModMenu();
+	//static bool isUserForceOpenModMenu();
 
 	//static void init();
 

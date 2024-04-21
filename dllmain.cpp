@@ -113,8 +113,24 @@ void initImguiV2() {
 }
 
 
-
+//? new version to handle people who can not use imgui: (the backup version is below)
 void modInit() {
+
+	logInfo("modInit: initializing json settings....");
+
+	if (initModDirectory()) {
+		Menu::LoadFromFile();
+		ModSettingsManager::updateFromImGui(Menu::getSettings());
+		Menu::logChangedJsonFile();
+
+	}
+	else {
+
+		modStatus.setError();		
+		return;
+	}
+
+
 
 	logInfo("modInit: waiting for MenuStateManager to initialize....");
 
@@ -131,25 +147,51 @@ void modInit() {
 		Sleep(100);
 	}
 
-	
-	if (initModDirectory()) {
-		Menu::LoadFromFile();
-		ModSettingsManager::updateFromImGui(Menu::getSettings());
-		Menu::logChangedJsonFile();
-
-	}
-	else {
-		
-		modStatus.setError();
-	}
-
 
 	std::string gameVersionStr = BuildInfo::getBuildStr();
 	logInfo("Game build version: %s", gameVersionStr.c_str());
 
-	
+
 
 }
+
+
+//void modInit() {
+//
+//	logInfo("modInit: waiting for MenuStateManager to initialize....");
+//
+//	idCvarManager::setModInitCvars();
+//
+//	idCvarManager::setCriticalCvars();
+//
+//	languageManager::LogGameLocalisation();
+//
+//
+//	logInfo("modInit: Game Window Width: %d Heigth: %d", cachedCvarsManager::get_WindowWidthInt(), cachedCvarsManager::get_WindowHeightInt());
+//
+//	while (MenuStateManager::get() == uninitialized || MenuStateManager::get() == undefined) {
+//		Sleep(100);
+//	}
+//
+//	
+//	if (initModDirectory()) {
+//		Menu::LoadFromFile();
+//		ModSettingsManager::updateFromImGui(Menu::getSettings());
+//		Menu::logChangedJsonFile();
+//
+//	}
+//	else {
+//		
+//		modStatus.setError();
+//	}
+//
+//
+//	std::string gameVersionStr = BuildInfo::getBuildStr();
+//	logInfo("Game build version: %s", gameVersionStr.c_str());
+//
+//	
+//
+//}
 
 
 bool InitializeHooksV2() {
@@ -368,7 +410,7 @@ DWORD WINAPI ModMain() {
 
 	Console::Enable();
 
-	Config::setBuildType(buildType::nexusRelease);  //! dev, nexusDebug, nexusRelease   
+	Config::setBuildType(buildType::nexusDebug);  //! dev, nexusDebug, nexusRelease   
 
 	//! this could and sould be simplified....
 	if (Config::getBuildType() == buildType::dev) {
@@ -492,7 +534,7 @@ DWORD WINAPI ModMain() {
 		}
 
 		//! wait until game menu is initialized before imgui init
-		if (ImGuiManager::isInitFlag()) {
+		if (ModSettingsManager::getIsUseImgui() && ImGuiManager::isInitFlag()) {
 			initImguiV2();         
 		}
 
