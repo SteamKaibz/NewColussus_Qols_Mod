@@ -28,6 +28,8 @@ public:
 	//! we can't be on a timer here anymore as we need to update this value very often as we realised the cam anim value is used for recoil, headbob and potentially many other things so we have to update it as often as possible.
 	//static void updateAnimCamAmount_OnTimer(idPlayer* idPlayerPtr, uint64_t updateFreqsMs);
 
+	//static std::string getDgbStrForImgui();
+
 	static void updateAnimCamAmount(idPlayer* idPlayerPtr);
 	static std::string animCamChangeReasonStr(AnimCamAmountChangeReson value);
 };

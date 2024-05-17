@@ -8,6 +8,8 @@ enum AnimCamAmountChangeReson {
 	AnimCamChangeReasonUndefined,
 	AnimCamChangeReasonInCutScene,
 	AnimCamChangeReasonWeaponFiring,
+	AnimCamChangeReasonInWheelChair, //! we need that to prevent issues reported on nexus comment
+	AnimCamChangeReasonMIDNIGHT_LIMITVIEW_NARROW,
 	AnimCamChangeReasonHeadbobVal
 };
 
@@ -172,10 +174,10 @@ enum gameState_t {
 
 
 enum movementMode_t {
-	MOVEMENT_MODE_STANDING = 0,
+	MOVEMENT_MODE_STANDING = 0, //! this is not just standing this is true when running, walking, firing while up...
 	MOVEMENT_MODE_CROUCHED = 1,
 	MOVEMENT_MODE_WANDERER = 2,
-	MOVEMENT_MODE_GROUNDCOMBAT = 3,
+	MOVEMENT_MODE_GROUNDCOMBAT = 3, //! this is basically being forced prone. this is not actual "ground combat"
 	MOVEMENT_MODE_CRAWLSPACE = 4,
 	MOVEMENT_MODE_ACTIVATION = 5,
 	MOVEMENT_MODE_ACTIVATION_EXIT = 6,

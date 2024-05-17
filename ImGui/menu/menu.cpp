@@ -75,10 +75,8 @@ namespace Menu {
         if (bShowDebugWindow) {  
             DebugGui::showDebugWindow();
         }
-
        
         if (bShowMenu) {
-
             showModMenu();
             return;             
         }
@@ -89,13 +87,11 @@ namespace Menu {
 
         if (ModSettingsManager::isShowFlashLightIcon() && idEngineLocalManager::isGameActive() && idLightManager::isHeadLightOn()) {
             hudExtrasGui::showHudExtrasWindow();
-        }
-              
+        }              
 
         if (bShowWarningWindow) {
             WarningGui::showWarningWindow();
-        }
-       
+        }       
     }
 
 

@@ -8,6 +8,23 @@ movementMode_t Tests::m_lastCurrentMovementMode = MOVEMENT_MODE_NUM;
 std::vector<__int64> Tests::addArgFrom_371DB0_Vec = {};
 
 
+
+std::string Tests::getmovementModeDgbStrForImgui() {
+
+    std::string resultStr = "movementMode DEBUG: ";
+
+    idPlayer* idPlayerPtr = idGameLocalManager::getIdPlayer();
+    if (!idPlayerPtr) {
+        return "movementMode DEBUG : IPlayer is Bad ptr";
+    }
+
+    std::string curMovementStr = MovementModeToString(idPlayerPtr->playerVolatile.currentMovementMode);
+    resultStr += curMovementStr;
+
+    return resultStr;
+}
+
+
 void Tests::printUseKeyState()
 {
     auto idplayer = idGameLocalManager::getIdPlayer();

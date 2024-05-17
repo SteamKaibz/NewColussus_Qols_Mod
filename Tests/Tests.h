@@ -18,7 +18,9 @@ private:
 	static std::vector<__int64> addArgFrom_371DB0_Vec;
 
 public:
-	void printUsercmdAddrs();
+	//void printUsercmdAddrs();
+
+	static std::string getmovementModeDgbStrForImgui();
 
 	void printUseKeyState();
 	void PrintIdPlayerInfo();

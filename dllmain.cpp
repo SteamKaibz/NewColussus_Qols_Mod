@@ -412,8 +412,10 @@ DWORD WINAPI ModMain() {
 
 	Config::setBuildType(buildType::nexusDebug);  //! dev, nexusDebug, nexusRelease   
 
+
+
 	//! this could and sould be simplified....
-	if (Config::getBuildType() == buildType::dev) {
+	if (Config::getBuildType() == buildType::nexusRelease) {
 		Config::set(ModConfig::debug);
 		logWarn("this is dev build, logging level set to info + some extras.");
 	}

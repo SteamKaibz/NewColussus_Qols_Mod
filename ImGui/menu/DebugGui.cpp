@@ -23,10 +23,10 @@ void DebugGui::showDebugWindow(bool* p_open)
 
     ImGuiDebugWin::AddMessage("idFocusTrackerManager Last Crosshair Info State: ");
     ImGuiDebugWin::AddMessage(idFocusTrackerManager::getCrosshairInfoStr());
+    ImGuiDebugWin::AddMessage(Tests::getmovementModeDgbStrForImgui());
 
 
-    ImGuiDebugWin::AddMessage(hudManager::inGuiGetDualWieldInfo());
-       
+    ImGuiDebugWin::AddMessage(hudManager::inGuiGetDualWieldInfo());       
 
 
 

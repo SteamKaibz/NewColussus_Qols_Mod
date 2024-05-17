@@ -187,8 +187,6 @@ struct Int128 {
 void initImguiV2();
 
 
-
-
 typedef char(__fastcall* idMenuManager_Shell_Update_t)(__int64 idMenuManager_Shell_a1, __int64* a2);
 idMenuManager_Shell_Update_t p_idMenuManager_Shell_Update_t = nullptr;
 idMenuManager_Shell_Update_t p_idMenuManager_Shell_Update_t_Target = nullptr;
@@ -830,6 +828,7 @@ char __fastcall idPlayer_UseCheck_Hook(idPlayer* idPlayer_a1, __int64* gameTime_
 	idLightManager::AdjustLight(idPlayer_a1);
 
 
+	//? keep in mind the checking the pm_animCamAmoun value in console will not reflect the actual value we set with our method. i guess this is because of flags not being updated cause we change the float value directly and we should instead use the execute cmd, same as we do in doom eternal mod.
 	cameraManager::updateAnimCamAmount(idPlayer_a1);	
 
 
@@ -967,14 +966,14 @@ WNDPROC pOriginalWndProc = nullptr;
 
 LRESULT CALLBACK HookedWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
-
-
 	if (MenuStateManager::isNotMenu() && !idConsoleLocalManager::isConsoleOpened() && cachedCvarsManager::isWindowFocused()) {
 		if (uMsg == WM_KEYDOWN) {
 			if (wParam == ModSettingsManager::getNormalSpeedKeyCode()) {
+				logInfo("HookedWndProc: user pressing normal speed key");
 				timescaleManager::setDefaultSpeed();
 			}
 			else if (wParam == ModSettingsManager::getFastForwardKeyCode()) {
+				logInfo("HookedWndProc: user pressing fast forward speed key");
 				timescaleManager::setMaxSpeed();
 			}
 			else if (wParam == ModSettingsManager::getFlashLightKeyCode()) {
