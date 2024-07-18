@@ -187,35 +187,52 @@ struct Int128 {
 void initImguiV2();
 
 
+
+
+
 typedef char(__fastcall* idMenuManager_Shell_Update_t)(__int64 idMenuManager_Shell_a1, __int64* a2);
 idMenuManager_Shell_Update_t p_idMenuManager_Shell_Update_t = nullptr;
 idMenuManager_Shell_Update_t p_idMenuManager_Shell_Update_t_Target = nullptr;
 
 char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, __int64* a2) {
 
+	static bool isMenuInitialized = false;
 	static bool last_bShowMenu = false;
 	static shellScreen_t lastMenuIndex = shellScreen_t::NUM_SHELL_SCREENS;
-	static bool isFirtTimeLogImguiUsage = true;
-
-	if (!ModSettingsManager::getIsUseImgui()) {
-		if (isFirtTimeLogImguiUsage) {
-			isFirtTimeLogImguiUsage = false;
-			logWarn("idMenuManager_Shell_Update_Hook: user is not using Imgui, mod settings UI is disabled.");
-		}
-		return p_idMenuManager_Shell_Update_t(idMenuManager_Shell_a1, a2);
-	}
-
-
-
-	ImGuiManager::setIsInitFlag(true);
+	static bool isFirtTimeLogImguiUsage = true;			
 
 
 	MenuStateManager::acquireidMenuManager_ShellPtr(idMenuManager_Shell_a1);
 
 	timescaleManager::setDefaultSpeed();	
+
+
+	if (!ModSettingsManager::getIsUseImgui()) {
+		if (isFirtTimeLogImguiUsage) {
+			isFirtTimeLogImguiUsage = false;
+			logWarn("idMenuManager_Shell_Update_Hook: user is not using Imgui, mod settings UI is disabled. User will not be able to change any mod setting at runtime, he will have to restart the game for changes to take effect.");
+		}
+		return p_idMenuManager_Shell_Update_t(idMenuManager_Shell_a1, a2);
+	}
 	 
 
 	shellScreen_t currentMenuIndex = *(shellScreen_t*)(idMenuManager_Shell_a1 + 0x30);
+
+
+	if ((currentMenuIndex >= SHELL_SCREEN_START && currentMenuIndex < NUM_SHELL_SCREENS)) {
+
+		ImGuiManager::setIsInitFlag(true);
+		if (!isMenuInitialized) {
+			logInfo("idMenuManager_Shell_Update_Hook: menu is being initialized, menu index: %d", currentMenuIndex);
+		}		
+		isMenuInitialized = true;
+		
+	}
+	else if(!isMenuInitialized) {
+		logInfo("idMenuManager_Shell_Update_Hook: waiting for menu to initialize...(currentMenuIndex val: %d)", currentMenuIndex);
+
+		return p_idMenuManager_Shell_Update_t(idMenuManager_Shell_a1, a2); //? retuning.
+	}
 
 
 	idCvarManager::setCvar("menu_showOptionForDevMenu", "1");
@@ -258,13 +275,10 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 
 			weaponsManager::updateDeclWeapons();
 
-			customDotCrosshairManager::setUserInModSettings();			
-			
-			logInfo("shell hook: setting timeScaleManager to default speed cause we're leaving mod menu.");
+			customDotCrosshairManager::setUserInModSettings();				
 
 
-			hudManager::logWarningTriggerVals();
-			
+			hudManager::logWarningTriggerVals();			
 
 		}
 
@@ -275,7 +289,7 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 
 		std::string lastMenuStr = MenuStateManager::shellScreenToString(lastMenuIndex);
 		std::string currMenuStr = MenuStateManager::shellScreenToString(currentMenuIndex);
-		logInfo("shell hook: shell menu has changed from %s to %s", lastMenuStr.c_str(), currMenuStr.c_str());
+		logInfo("shell hook: shell menu has changed from %s (shellScreen_t: 0x%X) to %s (shellScreen_t: 0x%X)", lastMenuStr.c_str(), (int)lastMenuIndex, currMenuStr.c_str(), (int)currentMenuIndex);
 
 		lastMenuIndex = currentMenuIndex;
 	}
@@ -456,8 +470,6 @@ __int64 __fastcall getLocalisedStrAddrMB_Hook(__int64 struct_a1, char* string_a2
 
 
 
-
-
 typedef void(__fastcall* swf_RenderEditTex_t)(
 	__int64 idSWF_a1,
 	__int64 idRenderModelGui_a2,
@@ -485,11 +497,13 @@ void __fastcall swf_RenderEditTex_Hook(
 
 	static bool isFirstTimeDevString = true;
 	static bool isFirstTimeDevHelpString = true;
+	static int hookExecDevStrCheckCounter = 0;
+	static int hookExecDevHelpStrCheckCounter = 0;
 
+	static void* lasttextInst_textPtr = nullptr;
 
 	
 	if (idSWFTextInstance_a3) {
-
 		
 		auto textInst = (idSWFTextInstance*)idSWFTextInstance_a3;	
 
@@ -523,18 +537,34 @@ void __fastcall swf_RenderEditTex_Hook(
 			}
 		}
 
+		//? may be this is causing a freeze for many users...we could replace it by a btn they have to press to acces the mod settings...
+		
+		/*else if (MenuStateManager::isRenderModNameFlag() && (textInst->text.data && languageManager::getLocalizedDevStr() && strcmp(textInst->text.data, languageManager::getLocalizedDevStr()) == 0)) {
+
+			if (&textInst->text != lasttextInst_textPtr) {
+
+				lasttextInst_textPtr = &textInst->text;
+
+				logInfo("debug main menu: textInst: %p &textInst->text has changed to: %p swf_RenderEditTex_Hook: textInst->text.len: %d textInst->text.allocedAndFlag: 0x%X  languageManager::getLocalizedDevStr(): %s", textInst, &textInst->text ,  textInst->text.len, textInst->text.allocedAndFlag, languageManager::getLocalizedDevStr());
+			}			
+		}*/
+
+		//! changing the str_menu_root_dev_label
 		else if (MenuStateManager::isRenderModNameFlag() && (textInst->text.data && languageManager::getLocalizedDevStr() && strcmp(textInst->text.data, languageManager::getLocalizedDevStr()) == 0)) {
+			logInfo("debug main menu: swf_RenderEditTex_Hook: textInst->text.len: %d textInst->text add: %p", textInst->text.len, &textInst->text);
 			if (textInst->text.allocedAndFlag) {
-				strncpy(textInst->text.data, "Kaibz Mod", 9); 
+				strncpy(textInst->text.data, "Kaibz Mod", 9);
 				if (isFirstTimeDevString) {
 					logInfo("isFirstTimeDevString (mininising log output): swf_RenderEditTex_Hook: overwriting localized Dev str");
 					isFirstTimeDevString = false;
 				}
 				textInst->text.len = 9;
-			}	
+			}
 		}
 
 
+		//! changing the str_menu_root_dev_help. this is the text at the bottom of the screen when hovering over a btn in the menu.
+		//? 24/5/24 temporily checking if we can just comment this out....
 		else if (MenuStateManager::isRenderModNameFlag() && (textInst->text.data && languageManager::getLocalizedDevHelpTextStr() && strcmp(textInst->text.data, languageManager::getLocalizedDevHelpTextStr()) == 0)) {
 			if (textInst->text.allocedAndFlag) {
 				strncpy(textInst->text.data, "Open Mod Settings", 17);
@@ -544,14 +574,13 @@ void __fastcall swf_RenderEditTex_Hook(
 				}
 				textInst->text.len = 17;
 			}
-		}
-
-
-		
+		}		
 		
 	}
 
-		
+	/*if (hookExecCounter <= 10 ) {
+		logInfo("swf_RenderEditTex_Hook: debug: hook has executed: %d times (max counter 10)", hookExecCounter);
+	}*/		
 
 	return p_swf_RenderEditTex(idSWF_a1, idRenderModelGui_a2, idSWFTextInstance_a3, a4, a5, a6, a7);
 }

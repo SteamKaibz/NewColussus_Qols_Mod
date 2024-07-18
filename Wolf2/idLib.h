@@ -2,6 +2,8 @@
 #include "../Config/Config.h"
 
 
+//? side note: class who have member functions defined directly within the class definition are implicitly inline functions, which is why you can add this file to many other file and not break the one definition rule.
+
 //struct idStr {
 //	char pad_K_000;
 //	//Offset 8,	 size 8
@@ -43,7 +45,7 @@ struct idStr {
 	//Offset 0x10,	 size 4
 	int len;
 	//Offset 0x14,	 size 4
-	int allocedAndFlag;
+	int allocedAndFlag; //? it seems this is a flag to indicate if data is static or not. 
 	//Offset 0x18,	 size 24
 	char baseBuffer[24];
 };

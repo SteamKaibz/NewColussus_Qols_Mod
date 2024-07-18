@@ -37,11 +37,8 @@ bool isConflictingModExist() {
 
 		for (const auto& entry : std::filesystem::directory_iterator(currentPath))
 		{
-
 			std::filesystem::path filePath = entry.path();
 			std::wstring fileNameToLowerWstr = K_Utils::WstrtoLower(filePath.filename().wstring());
-
-
 			
 
 			if (fileNameToLowerWstr == dinput8ModName)
@@ -57,8 +54,7 @@ bool isConflictingModExist() {
 						return true;
 					}
 					logWarn("Found file called: %s mod in game directory, this file may conflict with the mod (or not)", fileNameStr.c_str());
-				}	
-				
+				}				
 			}	
 			else {
 
@@ -405,7 +401,6 @@ bool findGameWindow(std::string windowName) {
 
 
 
-
 DWORD WINAPI ModMain() {
 
 	Console::Enable();
@@ -413,9 +408,8 @@ DWORD WINAPI ModMain() {
 	Config::setBuildType(buildType::nexusDebug);  //! dev, nexusDebug, nexusRelease   
 
 
-
 	//! this could and sould be simplified....
-	if (Config::getBuildType() == buildType::nexusRelease) {
+	if (Config::getBuildType() == buildType::dev) {
 		Config::set(ModConfig::debug);
 		logWarn("this is dev build, logging level set to info + some extras.");
 	}
@@ -611,21 +605,10 @@ DWORD WINAPI ModMain() {
 
 				idResourceManager::debugLogResourceListForClsName("idDeclSwfJournalResource");
 
-
-
-
-
-
-
-
-
-
-
 			}
 
 			if (GetAsyncKeyState(VK_NUMPAD5) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
 				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
-
 
 
 

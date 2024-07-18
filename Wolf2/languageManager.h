@@ -13,6 +13,9 @@ class languageManager
 
 private:
 	
+	//static const char* m_modMenuBtnStr; //! the btn people will press to go to mod menu
+	//static const char* m_modMenuHelpStr; //! the string at the bottom of the string when user hover over the mod menu btn
+
 	static const char* m_devLocalisedLabelStrPtr;
 	static const char* m_devLocalisedHelpTextStrPtr;
 
@@ -22,6 +25,12 @@ private:
 public:
 
 	static bool acquireDevStringsPtrs();
+
+	//static void replaceDevText(idSWFTextInstance* textInst);
+
+
+	static const char* getModMenuBtnStr();
+	static const char* getModMenuHelpStr();
 
 	static const char* getLocalizedDevStr();
 

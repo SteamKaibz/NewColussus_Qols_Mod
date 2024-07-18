@@ -1,5 +1,9 @@
 # NewColussus_Qols_Mod
 
+## Help needed !
+
+If you have knowledge of vulkan and or Imgui and are willing to help or submit pull request to fix the vulkan related issues, please let me know.
+
 ## Presentation
 
 This is the source code for the Steam version of the game: Wolfenstein.II.The.New.Colossus 

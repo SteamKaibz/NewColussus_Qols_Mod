@@ -64,7 +64,7 @@ std::string MenuStateManager::shellScreenToString(shellScreen_t screen) {
 	case SHELL_SCREEN_GAMESTARTS: return "SHELL_SCREEN_GAMESTARTS";
 	case SHELL_SCREEN_MODESELECT: return "SHELL_SCREEN_MODESELECT";
 	case NUM_SHELL_SCREENS: return "NUM_SHELL_SCREENS";
-	default: return "Unknown Shell Screen, may be in game";
+	default: return "Unknown Shell Screen"; //!  (may be in game)
 	}
 }
 

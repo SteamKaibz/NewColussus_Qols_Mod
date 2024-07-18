@@ -10,7 +10,6 @@ FILE* Config::fp;
  buildType Config::m_buildType{ buildType::unknown };
 
 
-
  void Config::setBuildType(buildType type) {
 	 m_buildType = type;
  }

@@ -25,7 +25,7 @@ void Console::Enable( ) {
 
 	if (!GetConsoleWindow()) {
 		AllocConsole();
-		SetConsoleTitleA("DE Advanced Options Mod - Debug Console");
+		SetConsoleTitleA("Mod - Debug Console");
 
 		freopen_s(reinterpret_cast<FILE**>(stdin), "conin$", "r", stdin);
 		freopen_s(reinterpret_cast<FILE**>(stdout), "conout$", "w", stdout);

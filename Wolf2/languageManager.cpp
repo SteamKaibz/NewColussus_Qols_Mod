@@ -1,6 +1,9 @@
 #include "languageManager.h"
 
 
+//const char* languageManager::m_modMenuBtnStr = "KaibzMod";
+//const char* languageManager::m_modMenuHelpStr = "Mod Menu";
+
 const char* languageManager::m_devLocalisedLabelStrPtr = nullptr;
 const char* languageManager::m_devLocalisedHelpTextStrPtr = nullptr;
 
@@ -19,6 +22,22 @@ bool languageManager::acquireDevStringsPtrs()
 	return false;
 }
 
+
+//void languageManager::replaceDevText(idSWFTextInstance* textInst) {
+//	if (textInst) {
+//		std::string newText = "KaibzMod";
+//		strncpy(textInst->text.data, newText.c_str(), newText.size() + 1);
+//	}	
+//}
+
+
+//const char* languageManager::getModMenuBtnStr() {
+//	return; m_modMenuBtnStr;
+//}
+//
+//const char* languageManager::getModMenuHelpStr() {
+//	return m_modMenuHelpStr;
+//}
 
 const char* languageManager::getLocalizedDevStr() {
 	return m_devLocalisedLabelStrPtr;
