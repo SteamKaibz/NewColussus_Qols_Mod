@@ -197,6 +197,92 @@ void cachedCvarsManager::skipRenderText(bool isSkipRenderText) {
 }
 
 
+
+//! progressive + deceleration but still not good enough especially when transitioning from moving to leaning as there will be visible rotation, but best we can do for the moment.
+void cachedCvarsManager::setAnimCamAmountProgressive(float animCamAmountF) {
+	if (m_pm_animCamAmount) {
+		float& currentValue = m_pm_animCamAmount->valueFloat;
+		const float maxStep = 0.07f; // Maximum step size
+		const float tolerance = 0.0001f; // Small value for float comparison
+
+		// Calculate the absolute difference between the current and target values
+		float difference = fabs(currentValue - animCamAmountF);
+
+		// Determine the step size, which decelerates as it approaches the target
+		float step = difference * maxStep; // Step size proportional to distance
+		if (step > maxStep) {
+			step = maxStep; // Clamp step size to maximum
+		}
+
+		// Ensure we don't exceed the step size to avoid overshooting
+		if (step < tolerance) {
+			step = tolerance; // Ensure a minimum movement
+		}
+
+		// Update the current value progressively towards the target
+		if (currentValue < animCamAmountF) {
+			currentValue += step;
+			// Prevent overshooting the target
+			if (currentValue > animCamAmountF) {
+				currentValue = animCamAmountF;
+			}
+		}
+		else {
+			currentValue -= step;
+			// Prevent undershooting the target
+			if (currentValue < animCamAmountF) {
+				currentValue = animCamAmountF;
+			}
+		}
+
+		return;
+	}
+	logErr("setAnimCamAmountProgressive: failed to find cvar");
+}
+
+//void cachedCvarsManager::setAnimCamAmountProgressive(float animCamAmountF) {
+//	if (m_pm_animCamAmount) {
+//		float& currentValue = m_pm_animCamAmount->valueFloat;
+//		const float step = 0.1f; // was 0.02
+//		const float tolerance = 0.0001f; // Small value for float comparison
+//
+//		// If the current value is not within the tolerance range of the target value
+//		if (fabs(currentValue - animCamAmountF) > tolerance) {
+//			if (currentValue < animCamAmountF) {
+//				currentValue += step;
+//				// Prevent overshooting the target
+//				if (currentValue > animCamAmountF) {
+//					currentValue = animCamAmountF;
+//				}
+//			}
+//			else {
+//				currentValue -= step;
+//				// Prevent undershooting the target
+//				if (currentValue < animCamAmountF) {
+//					currentValue = animCamAmountF;
+//				}
+//			}
+//		}
+//
+//		return;
+//	}
+//	logErr("setAnimCamAmountProgressive: failed to find cvar");
+//}
+
+
+
+void cachedCvarsManager::setAnimCamAmount(float animCamAmountF) {
+	if (m_pm_animCamAmount) {
+		if (m_pm_animCamAmount->valueFloat != animCamAmountF) {		
+			
+			m_pm_animCamAmount->valueFloat = animCamAmountF;
+		}
+		return;
+	}
+	logErr("setAnimCamAmount: failed to find cvar");
+}
+
+
 void cachedCvarsManager::setAnimCamAmount(float animCamAmountF, AnimCamAmountChangeReson changeReason) {
 	if (m_pm_animCamAmount) {
 		if (m_pm_animCamAmount->valueFloat != animCamAmountF) {
@@ -217,7 +303,7 @@ bool cachedCvarsManager::setUserAnimCamAmountProgressive()
 			m_pm_animCamAmount->valueFloat -= m_headbobResetIncrements;
 			if (m_pm_animCamAmount->valueFloat < 0) {
 				m_pm_animCamAmount->valueFloat = 0;
-				logErr("setUserAnimCamAmountProgressive: m_pm_animCamAmount->valueFloat was being set to negative...something is wrong...");
+				//logErr("setUserAnimCamAmountProgressive: m_pm_animCamAmount->valueFloat was being set to negative...something is wrong...");
 			}
 			return false;
 		}

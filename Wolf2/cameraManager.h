@@ -21,6 +21,7 @@ private:
 
 public:
 
+	static inline bool Dbg_isPostFiring = false;
 	//static void updateAnimCamAmount();
 	
 
@@ -31,6 +32,7 @@ public:
 	//static std::string getDgbStrForImgui();
 
 	static void updateAnimCamAmount(idPlayer* idPlayerPtr);
+	static void updateAnimCamAmountV2(idPlayer* idPlayerPtr);
 	static std::string animCamChangeReasonStr(AnimCamAmountChangeReson value);
 };
 

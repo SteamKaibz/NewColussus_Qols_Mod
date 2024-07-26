@@ -175,7 +175,6 @@
     <ClInclude Include="Wolf2\idAutomapManager.h" />
     <ClInclude Include="Wolf2\languageManager.h" />
     <ClInclude Include="Wolf2\idLoadScreenManager.h" />
-    <ClInclude Include="Wolf2\idPlayer_K.h" />
     <ClInclude Include="Wolf2\hintManager.h" />
     <ClInclude Include="Wolf2\idRenderParmManager.h" />
     <ClInclude Include="Wolf2\soundManager.h" />
@@ -299,7 +298,6 @@
     <ClCompile Include="Wolf2\idAutomapManager.cpp" />
     <ClCompile Include="Wolf2\languageManager.cpp" />
     <ClCompile Include="Wolf2\idLoadScreenManager.cpp" />
-    <ClCompile Include="Wolf2\idPlayer_K.cpp" />
     <ClCompile Include="MD5\md5Check.cpp" />
     <ClCompile Include="Wolf2\hintManager.cpp" />
     <ClCompile Include="Wolf2\idRenderParmManager.cpp" />

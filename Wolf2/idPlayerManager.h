@@ -15,6 +15,7 @@ private:
 
 public:
 	static idHudInfo* getIdHudInfo();
+	static idPlayer_animSysEvents_t getPreMoveEvent();
 	static void handleChange(idPlayer* idPlayerPtr);
 };
 

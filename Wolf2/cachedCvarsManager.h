@@ -64,6 +64,10 @@ public :
 
 	static void skipRenderText(bool isSkipRenderText);
 
+	static void setAnimCamAmountProgressive(float animCamAmountF);
+
+	static void setAnimCamAmount(float animCamAmountF);
+
 	static void setAnimCamAmount(float animCamAmountF, AnimCamAmountChangeReson reason);
 
 	//! this is to prevent the jarring effect when user stops firing and AnimCamAmount goes from 1 to 0.1 and snaps the camera into place which is very visible . Not a great way to do it but let's see at least if it works

@@ -202,6 +202,46 @@ struct idVec4_Bounds {
 
 
 
+struct idMat2 {
+	//Offset 0x0,	 size 16
+	idVec2 mat[2];
+};
+
+
+struct idMat3 {
+	//Offset 0x0,	 size 36
+	idVec3 mat[3];
+};
+
+
+struct idMat3x4 {
+	//Offset 0x0,	 size 48
+	float mat[12];
+};
+
+
+struct idMat4 {
+	//Offset 0x0,	 size 64
+	idVec4 mat[4];
+};
+
+
+
+
+struct idMatX {
+	//Offset 0x0,	 size 4
+	int numRows;
+	//Offset 0x4,	 size 4
+	int numColumns;
+	//Offset 0x8,	 size 4
+	int alloced;
+	//Offset 0x10,	 size 8
+	float* mat;
+};
+
+
+
+
 struct  idQuat {
 	//Offset 0,	 size 4
 	//METASTATE|ALLOCATOR|SAVESKIP

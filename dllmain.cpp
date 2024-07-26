@@ -405,7 +405,7 @@ DWORD WINAPI ModMain() {
 
 	Console::Enable();
 
-	Config::setBuildType(buildType::nexusDebug);  //! dev, nexusDebug, nexusRelease   
+	Config::setBuildType(buildType::nexusRelease);  //! dev, nexusDebug, nexusRelease   
 
 
 	//! this could and sould be simplified....
@@ -587,10 +587,13 @@ DWORD WINAPI ModMain() {
 
 				std::string currentMapName = idGameLocalManager::getCurrentMapName();
 				logInfo("currentMapName: %s", currentMapName.c_str());
-
-
 				
 				cachedCvarsManager::debugLogWin_hasFocusCvar();
+
+				logInfo("IdHudInfo ptr: %p", idPlayerManager::getIdHudInfo());
+
+				idCVar* animCamAmountCvar = (idCVar*)idCvarManager::getCvarPtr("pm_animCamAmount");
+				logInfo("animCamAmountCvar: %p", animCamAmountCvar);
 
 
 

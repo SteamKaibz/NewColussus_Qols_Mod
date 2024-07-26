@@ -29,6 +29,8 @@ public:
 
 	static bool isHudHiddenAlt();
 
+	static leanMode_t getLeanMode();
+
 	//static void acquireidHudInfoPtr(idHudInfo* ptr);
 
 	static void logWarningTriggerVals();

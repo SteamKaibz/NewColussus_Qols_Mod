@@ -28,7 +28,13 @@ void DebugGui::showDebugWindow(bool* p_open)
 
     ImGuiDebugWin::AddMessage(hudManager::inGuiGetDualWieldInfo());       
 
+    std::string preMoveEventStr = "PreMoveEvent: ";
+    preMoveEventStr += std::to_string((int)idPlayerManager::getPreMoveEvent());
+    ImGuiDebugWin::AddMessage(preMoveEventStr);
 
+    std::string postFiringStr = "Is Post firing: ";
+    postFiringStr += std::to_string(cameraManager::Dbg_isPostFiring);
+    ImGuiDebugWin::AddMessage(postFiringStr);
 
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();

@@ -67,7 +67,7 @@ public:
 
             classDefsVec.push_back(ClassDef("idPlayer::idPlayerEditable", { "playerType"}));
 
-            classDefsVec.push_back(ClassDef("idPlayer::idPlayerVolatile", { "headlightIsActive", "currentMovementMode", "showMarkerHintFadeOutTime", "playerUseTime", "playerUseState", "hudInfo", "localView" }));
+            classDefsVec.push_back(ClassDef("idPlayer::idPlayerVolatile", { "headlightIsActive", "prevMoveEvent", "currentMovementMode", "showMarkerHintFadeOutTime", "playerUseTime", "playerUseState", "hudInfo", "localView" }));
 
             classDefsVec.push_back(ClassDef("idPlayer::idPlayerVolatileUnsaved", { "headLightptr", "focusTracker", "pauseScreenIndex", "playerProgress", "screenFX"}));
 

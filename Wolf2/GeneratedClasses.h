@@ -491,16 +491,60 @@ public:
 
 
 
-class idHudReticleInfo {
-public:
-	char pad_0[8]; // offset: 0h (0d) size: 8
-	idDeclWeaponReticle* decl; // offset: 8h (8d)  size: 8
-	char pad_16[8]; // offset: 10h (16d) size: 8
-	idDeclWeapon* weaponDecl; // offset: 18h (24d)  size: 8
-	char pad_32[68]; // offset: 20h (32d) size: 68
-	float targetIndication; // offset: 64h (100d)  size: 4
-	char pad_End[8]; // offset: 68h (104d) size: 8
-}; // size: 112
+//class idHudReticleInfo {
+//public:
+//	char pad_0[8]; // offset: 0h (0d) size: 8
+//	idDeclWeaponReticle* decl; // offset: 8h (8d)  size: 8
+//	char pad_16[8]; // offset: 10h (16d) size: 8
+//	idDeclWeapon* weaponDecl; // offset: 18h (24d)  size: 8
+//	char pad_32[68]; // offset: 20h (32d) size: 68
+//	float targetIndication; // offset: 64h (100d)  size: 4
+//	char pad_End[8]; // offset: 68h (104d) size: 8
+//}; // size: 112
+
+
+
+struct idHudReticleInfo {
+	//Offset 0x0,	 size 8
+	idMaterial* iconMaterial;
+	//Offset 0x8,	 size 8
+	idDeclWeaponReticle* decl;
+	//Offset 0x10,	 size 8
+	idDeclWeaponReticle* upgradeReticle;
+	//Offset 0x18,	 size 8
+	idDeclWeapon* weaponDecl;
+	//Offset 0x20,	 size 8
+	idAtomicString npcName;
+	//Offset 0x28,	 size 4
+	int flags;
+	//Offset 0x2C,	 size 4
+	int iconIndex;
+	//Offset 0x30,	 size 4
+	int entityNum;
+	//Offset 0x34,	 size 12
+	idVec3 tracePoint;
+	//Offset 0x40,	 size 8
+	char* text;
+	//Offset 0x48,	 size 16
+	idColor color;
+	//Offset 0x58,	 size 4
+	float spread;
+	//Offset 0x5C,	 size 4
+	float zoomFraction;
+	//Offset 0x60,	 size 4
+	float chargingFraction;
+	//Offset 0x64,	 size 4
+	float targetIndication;
+	//Offset 0x68,	 size 4
+	//? this will be -1 all the time from my tests.
+	leanMode_t leanDirIndication; //idEnvironmentAnalyzer::leanMode_t leanDirIndication;
+};
+
+
+
+
+
+
 
 
 
@@ -598,20 +642,115 @@ public:
 
 
 
-class idHudInfo {
-public:
-	char pad_0[1449]; // offset: 0h (0d) size: 1449
-	bool inScope; // offset: 5A9h (1449d)  size: 1
-	bool isZooming; // offset: 5AAh (1450d)  size: 1
-	char pad_1451[61]; // offset: 5ABh (1451d) size: 61
-	idHudWeaponAmmoStatusInfo weaponAmmoStatus; // offset: 5E8h (1512d)  size: 408
-	char pad_1920[432]; // offset: 780h (1920d) size: 432
-	idHudReticleInfo reticle; // offset: 930h (2352d)  size: 112
-	idHudHealthIndicatorInfo healthIndicator; // offset: 9A0h (2464d)  size: 44
-	char pad_2508[1776]; // offset: 9CCh (2508d) size: 1776
-	int hudFlags; // offset: 10BCh (4284d)  size: 4
-	char pad_End[8]; // offset: 10C0h (4288d) size: 8
-}; // size: 4296
+
+
+struct idHudInfo_Cinematic {
+	//Offset 0x0,	 size 1
+	bool show;
+	//Offset 0x1,	 size 1
+	bool fadeIn;
+	//Offset 0x8,	 size 8
+	idMaterial* cinematic;
+	//Offset 0x10,	 size 32
+	char cinematicTarget[32];  //idManagedClassPtr < idTarget_Cinematic > cinematicTarget;
+};
+
+
+struct idHudInteractionInfo {
+	//Offset 0x0,	 size 32
+	char icons[32]; // < idHudInteractionInfo::icon_t, TAG_IDLIST, false > icons;
+	//Offset 0x20,	 size 4
+	interactIconSet_t state;
+};
+
+
+struct idHudInfo {
+	//Offset 0x0,	 size 1448
+	char pad_0[1448];	//idHudInfo::playerInfoIndicator_t playerInfoIndicator;
+		//Offset 0x5A8,	 size 1
+	bool inCombat;
+	//Offset 0x5A9,	 size 1
+	bool inScope;
+	//Offset 0x5AA,	 size 1
+	bool isZooming;
+	//Offset 0x5AB,	 size 1
+	bool fireModePrimary;
+	//Offset 0x5AC,	 size 1
+	bool isSaving;
+	//Offset 0x5AD,	 size 1
+	bool blockIcons;
+	//Offset 0x5AE,	 size 1
+	bool gameIntroActive;
+	//Offset 0x5B0,	 size 4
+	float playerYaw;
+	//Offset 0x5B4,	 size 4
+	float playerPitch;
+	//Offset 0x5B8,	 size 12
+	idVec3 playerPos;
+	//Offset 0x5C4,	 size 36
+	idMat3 playerAxis;
+	//Offset 0x5E8,	 size 408
+	idHudWeaponAmmoStatusInfo weaponAmmoStatus;
+	//Offset 0x780,	 size 64
+	char activeNotification[64]; //idHud_NotificationEvent* [8] activeNotification;
+	//Offset 0x7C0,	 size 64
+	char activeNotificationSlot[64]; //idHud_NotificationSlot* [8] activeNotificationSlot;
+	//Offset 0x800,	 size 8
+	void* latestNotification; //idHud_NotificationSlot* latestNotification;
+	//Offset 0x808,	 size 224
+	char watchItems[224]; //idGrowableList < idVec3, 16, TAG_IDLIST > watchItems;
+	//Offset 0x8E8,	 size 72
+	char infoLog[72]; // idHudInfo::infoLog_t infoLog;
+	//Offset 0x930,	 size 112
+	idHudReticleInfo reticle;
+	//Offset 0x9A0,	 size 44
+	idHudHealthIndicatorInfo healthIndicator;
+	//Offset 0x9D0,	 size 216
+	char quickItems[216]; //idArray < idHudQuickItem, 9 > quickItems;
+	//Offset 0xAA8,	 size 40
+	char damageIndicator[40];//  damageIndicator_t damageIndicator;
+	//Offset 0xAD0,	 size 48
+	idHudInfo_Cinematic fullscreenCinematic;
+	//Offset 0xB00,	 size 32
+	char scriptHUDImageList[32];//< scriptHUDElement_t, TAG_IDLIST, false > scriptHUDImageList;
+	//Offset 0xB20,	 size 40
+	char interaction[40];
+	//Offset 0xB48,	 size 112
+	char commanderInfo[112]; //idHudInfo::commanderInfo_t commanderInfo;
+	//Offset 0xBB8,	 size 16
+	char radioVoice[16]; //idHudInfo::radioVoice_t radioVoice;
+	//Offset 0xBC8,	 size 8
+	char pickupLog[8]; //idHudInfo::pickupLog_t* pickupLog;
+		//Offset 0xBD0,	 size 8
+	char followerManager[8]; //idHudInfo::followerMgr* followerManager;
+	//Offset 0xBD8,	 size 1208
+	char weaponSelection[1208]; // weaponSelection_t weaponSelection;
+	//Offset 0x1090,	 size 40
+	char challengeElement[40]; //idHudInfo::challengeElement_t challengeElement;
+	//Offset 0x10B8,	 size 4
+	int activeTimer;//idTimeMs activeTimer;
+	//Offset 0x10BC,	 size 4
+	int hudFlags;
+	//Offset 0x10C0,	 size 4
+	int playerNum;
+};
+
+
+
+//class idHudInfo {
+//public:
+//	char pad_0[1449]; // offset: 0h (0d) size: 1449
+//	bool inScope; // offset: 5A9h (1449d)  size: 1
+//	bool isZooming; // offset: 5AAh (1450d)  size: 1
+//	char pad_1451[61]; // offset: 5ABh (1451d) size: 61
+//	idHudWeaponAmmoStatusInfo weaponAmmoStatus; // offset: 5E8h (1512d)  size: 408
+//	char pad_1920[432]; // offset: 780h (1920d) size: 432
+//	idHudReticleInfo reticle; // offset: 930h (2352d)  size: 112
+//	idHudHealthIndicatorInfo healthIndicator; // offset: 9A0h (2464d)  size: 44
+//	char pad_2508[1776]; // offset: 9CCh (2508d) size: 1776
+//	int hudFlags; // offset: 10BCh (4284d)  size: 4
+//	char pad_End[8]; // offset: 10C0h (4288d) size: 8
+//}; // size: 4296
 
 
 
@@ -744,12 +883,17 @@ public:
 }; // size: 864
 
 
+
+
+
 //class idPlayer_idPlayerVolatile {
 //public:
 //	char pad_0[30]; // offset: 0h (0d) size: 30
 //	//? using our system to set the headlight the will be false even if we active the light :(
 //	bool headlightIsActive; // offset: 1Eh (30d)  size: 1
-//	char pad_31[10361]; // offset: 1Fh (31d) size: 10361
+//	char pad_31[2245]; // offset: 1Fh (31d) size: 2245
+//	movementMode_t currentMovementMode; // offset: 8E4h (2276d)  size: 4
+//	char pad_2280[8112]; // offset: 8E8h (2280d) size: 8112
 //	// idTypesafeTime < long long , gameTimeUnique_t , 999960 >
 //	long long showMarkerHintFadeOutTime; // offset: 2898h (10392d)  size: 8
 //	char pad_10400[776]; // offset: 28A0h (10400d) size: 776
@@ -767,9 +911,10 @@ public:
 class idPlayer_idPlayerVolatile {
 public:
 	char pad_0[30]; // offset: 0h (0d) size: 30
-	//? using our system to set the headlight the will be false even if we active the light :(
 	bool headlightIsActive; // offset: 1Eh (30d)  size: 1
-	char pad_31[2245]; // offset: 1Fh (31d) size: 2245
+	char pad_31[2145]; // offset: 1Fh (31d) size: 2145
+	idPlayer_animSysEvents_t prevMoveEvent; // offset: 880h (2176d)  size: 4
+	char pad_2180[96]; // offset: 884h (2180d) size: 96
 	movementMode_t currentMovementMode; // offset: 8E4h (2276d)  size: 4
 	char pad_2280[8112]; // offset: 8E8h (2280d) size: 8112
 	// idTypesafeTime < long long , gameTimeUnique_t , 999960 >
@@ -783,7 +928,6 @@ public:
 	localView_t localView; // offset: 87E0h (34784d)  size: 4600
 	char pad_End[72392]; // offset: 99D8h (39384d) size: 72392
 }; // size: 111776
-
 
 
 

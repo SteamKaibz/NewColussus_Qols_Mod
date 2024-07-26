@@ -860,6 +860,8 @@ char __fastcall idPlayer_UseCheck_Hook(idPlayer* idPlayer_a1, __int64* gameTime_
 	//? keep in mind the checking the pm_animCamAmoun value in console will not reflect the actual value we set with our method. i guess this is because of flags not being updated cause we change the float value directly and we should instead use the execute cmd, same as we do in doom eternal mod.
 	cameraManager::updateAnimCamAmount(idPlayer_a1);	
 
+	//cameraManager::updateAnimCamAmountV2(idPlayer_a1);
+
 
 	if (idFocusTrackerManager::shouldItemBePickedUp(idPlayer_a1)) {
 		autoItemPickUpManager::setUseKeyAutoPressFlag(true);

@@ -123,6 +123,21 @@ bool hudManager::isHudHiddenAlt() {
 }
 
 
+leanMode_t hudManager::getLeanMode() {
+
+	idHudInfo* idHudInfoPtr = idPlayerManager::getIdHudInfo();
+	if (idHudInfoPtr) {
+		return idHudInfoPtr->reticle.leanDirIndication;
+	}
+	logWarn("getLeanMode: failed to get leanmode");
+	return LEANMODE_ANY;
+
+}
+
+
+//idHudInfo* hudManager::getidHudInfo() {
+//	return idPlayerManager::getIdHudInfo();
+//}
 
 
 
