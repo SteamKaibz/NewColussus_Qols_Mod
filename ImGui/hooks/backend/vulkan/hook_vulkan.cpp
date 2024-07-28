@@ -43,12 +43,12 @@ static ImGui_ImplVulkanH_FrameSemaphores g_FrameSemaphores[8] = { };
 static HWND g_Hwnd = NULL;
 static VkExtent2D g_ImageExtent = { };
 
-static void CleanupDeviceVulkan( );
-static void CleanupRenderTarget( );
+static void CleanupDeviceVulkan();
+static void CleanupRenderTarget();
 static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentInfo);
 static bool DoesQueueSupportGraphic(VkQueue queue, VkQueue* pGraphicQueue);
 
-static bool CreateDeviceVK( ) {
+static bool CreateDeviceVK() {
     // Create Vulkan Instance
     {
         VkInstanceCreateInfo create_info = { };
@@ -60,7 +60,7 @@ static bool CreateDeviceVK( ) {
 
         // Create Vulkan Instance without any debug feature
         vkCreateInstance(&create_info, g_Allocator, &g_Instance);
-        logInfo("Vulkan: g_Instance: 0x%p\n", g_Instance);
+        logInfo("[+] Vulkan: g_Instance: 0x%p\n", g_Instance);
     }
 
     // Select GPU
@@ -86,7 +86,7 @@ static bool CreateDeviceVK( ) {
         }
 
         g_PhysicalDevice = gpus[use_gpu];
-        logInfo("Vulkan: g_PhysicalDevice: 0x%p\n", g_PhysicalDevice);
+        logInfo("[+] Vulkan: g_PhysicalDevice: 0x%p\n", g_PhysicalDevice);
 
         delete[] gpus;
     }
@@ -96,7 +96,7 @@ static bool CreateDeviceVK( ) {
         uint32_t count;
         vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, NULL);
         g_QueueFamilies.resize(count);
-        vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, g_QueueFamilies.data( ));
+        vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, g_QueueFamilies.data());
         for (uint32_t i = 0; i < count; ++i) {
             if (g_QueueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 g_QueueFamily = i;
@@ -105,7 +105,7 @@ static bool CreateDeviceVK( ) {
         }
         IM_ASSERT(g_QueueFamily != (uint32_t)-1);
 
-        logInfo("Vulkan: g_QueueFamily: %u\n", g_QueueFamily);
+        logInfo("[+] Vulkan: g_QueueFamily: %u\n", g_QueueFamily);
     }
 
     // Create Logical Device (with 1 queue)
@@ -128,7 +128,7 @@ static bool CreateDeviceVK( ) {
 
         vkCreateDevice(g_PhysicalDevice, &create_info, g_Allocator, &g_FakeDevice);
 
-        logInfo(" Vulkan: g_FakeDevice: 0x%p\n", g_FakeDevice);
+        logInfo("[+] Vulkan: g_FakeDevice: 0x%p\n", g_FakeDevice);
     }
 
     return true;
@@ -237,6 +237,12 @@ static void CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
         info.renderPass = g_RenderPass;
         info.attachmentCount = 1;
         info.pAttachments = attachment;
+
+        //! belazr changes 1 (https://github.com/bruhmoment21/UniversalHookX/issues/18)
+        info.width = g_ImageExtent.width;
+        info.height = g_ImageExtent.height;
+        //! belazr changes 1 end
+
         info.layers = 1;
 
         for (uint32_t i = 0; i < uImageCount; ++i) {
@@ -250,18 +256,18 @@ static void CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
     if (!g_DescriptorPool) // Create Descriptor Pool.
     {
         constexpr VkDescriptorPoolSize pool_sizes[] =
-            {
-                {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-                {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-                {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+        {
+            {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000} };
 
         VkDescriptorPoolCreateInfo pool_info = { };
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -276,11 +282,11 @@ static void CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkDevice, VkSwapchainKHR, uint64_t, VkSemaphore, VkFence, uint32_t*)> oAcquireNextImageKHR;
 static VkResult VKAPI_CALL hkAcquireNextImageKHR(VkDevice device,
-                                                 VkSwapchainKHR swapchain,
-                                                 uint64_t timeout,
-                                                 VkSemaphore semaphore,
-                                                 VkFence fence,
-                                                 uint32_t* pImageIndex) {
+    VkSwapchainKHR swapchain,
+    uint64_t timeout,
+    VkSemaphore semaphore,
+    VkFence fence,
+    uint32_t* pImageIndex) {
     g_Device = device;
 
     return oAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);
@@ -288,8 +294,8 @@ static VkResult VKAPI_CALL hkAcquireNextImageKHR(VkDevice device,
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkDevice, const VkAcquireNextImageInfoKHR*, uint32_t*)> oAcquireNextImage2KHR;
 static VkResult VKAPI_CALL hkAcquireNextImage2KHR(VkDevice device,
-                                                  const VkAcquireNextImageInfoKHR* pAcquireInfo,
-                                                  uint32_t* pImageIndex) {
+    const VkAcquireNextImageInfoKHR* pAcquireInfo,
+    uint32_t* pImageIndex) {
     g_Device = device;
 
     return oAcquireNextImage2KHR(device, pAcquireInfo, pImageIndex);
@@ -297,7 +303,7 @@ static VkResult VKAPI_CALL hkAcquireNextImage2KHR(VkDevice device,
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkQueue, const VkPresentInfoKHR*)> oQueuePresentKHR;
 static VkResult VKAPI_CALL hkQueuePresentKHR(VkQueue queue,
-                                             const VkPresentInfoKHR* pPresentInfo) {
+    const VkPresentInfoKHR* pPresentInfo) {
     RenderImGui_Vulkan(queue, pPresentInfo);
 
     return oQueuePresentKHR(queue, pPresentInfo);
@@ -305,106 +311,18 @@ static VkResult VKAPI_CALL hkQueuePresentKHR(VkQueue queue,
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkDevice, const VkSwapchainCreateInfoKHR*, const VkAllocationCallbacks*, VkSwapchainKHR*)> oCreateSwapchainKHR;
 static VkResult VKAPI_CALL hkCreateSwapchainKHR(VkDevice device,
-                                                const VkSwapchainCreateInfoKHR* pCreateInfo,
-                                                const VkAllocationCallbacks* pAllocator,
-                                                VkSwapchainKHR* pSwapchain) {
-    CleanupRenderTarget( );
+    const VkSwapchainCreateInfoKHR* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkSwapchainKHR* pSwapchain) {
+    CleanupRenderTarget();
     g_ImageExtent = pCreateInfo->imageExtent;
 
     return oCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
 }
 
-//__int64 __fastcall DefWindowProcW_Smth_8C7110(HWND hWnd, __int64 Msg, WPARAM wParam, LPARAM lParam)
-//typedef __int64(__fastcall* DefWindowProcW_Smth_8C7110)(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-//DefWindowProcW_Smth_8C7110 p_DefWindowProcW_Smth_8C7110 = nullptr;
-//DefWindowProcW_Smth_8C7110 p_DefWindowProcW_Smth_8C7110_Target = nullptr;
-//
-//LRESULT __fastcall DefWindowProcW_Smth_8C7110_Hook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-//
-//    
-//    LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//
-//
-//    if ((Msg == WM_KEYDOWN) && (wParam == VK_INSERT)) {
-//        Menu::bShowMenu = !Menu::bShowMenu;
-//        //return 0;
-//        return p_DefWindowProcW_Smth_8C7110(hWnd, Msg, wParam, lParam);
-//    }
-//
-//   
-//    ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
-//    //logInfo("we're here");
-//    ImGuiIO& io = ImGui::GetIO();
-//    
-//
-//    //if (Menu::bShowMenu)
-//    if (Menu::bShowMenu )
-//    {
-//       /* ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
-//        ImGuiIO& io = ImGui::GetIO();*/
-//        //! commenting this cause we're trying to use it from DefWindowProcW_Smth_8C7110_Hook
-//       
-//        // commenting this will simply not display the cursot to interact with imgui:
-//        io.MouseDrawCursor = true;
-//        //logInfo("uMsg: %u", uMsg);
-//
-//        //if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
-//        //    // ImGui wants to capture these events, do not pass them to the game
-//        //    return true;
-//        //}
-//        //return true;
-//
-//        switch (Msg)
-//        {
-//        case WM_LBUTTONDOWN:
-//            io.MouseDown[0] = true;
-//            logInfo("trigger !!!!!");
-//            //return 1;
-//            break;
-//        case WM_LBUTTONUP:
-//            io.MouseDown[0] = false;
-//            //return 1;
-//            break;
-//        case WM_RBUTTONDOWN:
-//            io.MouseDown[1] = true;
-//            break;
-//        case WM_RBUTTONUP:
-//            io.MouseDown[1] = false;
-//            break;
-//        case WM_MBUTTONDOWN:
-//            io.MouseDown[2] = true;
-//            break;
-//        case WM_MBUTTONUP:
-//            io.MouseDown[2] = false;
-//            break;
-//        case WM_MOUSEWHEEL:
-//            io.MouseWheel += GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? +1.0f : -1.0f;
-//            break;
-//        case WM_MOUSEMOVE:
-//            io.MousePos.x = (signed short)(lParam);
-//            io.MousePos.y = (signed short)(lParam >> 16);
-//            break;
-//        }
-//        logInfo("io.WantCaptureMouse: %d io.WantCaptureKeyboard: %d io.WantTextInput: %d", io.WantCaptureMouse, io.WantCaptureKeyboard, io.WantTextInput);
-//        if (io.WantCaptureMouse || io.WantCaptureKeyboard || io.WantTextInput)
-//        {
-//            return 1;
-//        }
-//
-//    }
-//    else {
-//        io.MouseDrawCursor = false;
-//    }
-//
-//    // Call the original function for default processing
-//    return p_DefWindowProcW_Smth_8C7110(hWnd, Msg, wParam, lParam);
-//}
-
-
-
 namespace VK {
     void Hook(HWND hwnd) {
-        if (!CreateDeviceVK( )) {
+        if (!CreateDeviceVK()) {
             logInfo("[!] CreateDeviceVK() failed.\n");
             return;
         }
@@ -423,10 +341,10 @@ namespace VK {
             g_Hwnd = hwnd;
 
             // Hook
-            logInfo("Vulkan: fnAcquireNextImageKHR: 0x%p\n", fnAcquireNextImageKHR);
-            logInfo("Vulkan: fnAcquireNextImage2KHR: 0x%p\n", fnAcquireNextImage2KHR);
-            logInfo("Vulkan: fnQueuePresentKHR: 0x%p\n", fnQueuePresentKHR);
-            logInfo("Vulkan: fnCreateSwapchainKHR: 0x%p\n", fnCreateSwapchainKHR);
+            logInfo("[+] Vulkan: fnAcquireNextImageKHR: 0x%p\n", fnAcquireNextImageKHR);
+            logInfo("[+] Vulkan: fnAcquireNextImage2KHR: 0x%p\n", fnAcquireNextImage2KHR);
+            logInfo("[+] Vulkan: fnQueuePresentKHR: 0x%p\n", fnQueuePresentKHR);
+            logInfo("[+] Vulkan: fnCreateSwapchainKHR: 0x%p\n", fnCreateSwapchainKHR);
 
             static MH_STATUS aniStatus = MH_CreateHook(reinterpret_cast<void**>(fnAcquireNextImageKHR), &hkAcquireNextImageKHR, reinterpret_cast<void**>(&oAcquireNextImageKHR));
             static MH_STATUS ani2Status = MH_CreateHook(reinterpret_cast<void**>(fnAcquireNextImage2KHR), &hkAcquireNextImage2KHR, reinterpret_cast<void**>(&oAcquireNextImage2KHR));
@@ -437,32 +355,25 @@ namespace VK {
             MH_EnableHook(fnAcquireNextImage2KHR);
             MH_EnableHook(fnQueuePresentKHR);
             MH_EnableHook(fnCreateSwapchainKHR);
-
-
-           /* p_DefWindowProcW_Smth_8C7110_Target = reinterpret_cast<DefWindowProcW_Smth_8C7110>(MemHelper::getFuncAddr(0x8C7110));
-            if (MH_CreateHook(reinterpret_cast<void**>(p_DefWindowProcW_Smth_8C7110_Target), &DefWindowProcW_Smth_8C7110_Hook, reinterpret_cast<void**>(&p_DefWindowProcW_Smth_8C7110)) != MH_OK) {
-                logErr("Failed to create p_DefWindowProcW_Smth_8C7110_Target hook.");               
-            }
-            MH_EnableHook(p_DefWindowProcW_Smth_8C7110_Target);*/
         }
     }
 
-    void Unhook( ) {
-        if (ImGui::GetCurrentContext( )) {
-            if (ImGui::GetIO( ).BackendRendererUserData)
-                ImGui_ImplVulkan_Shutdown( );
+    void Unhook() {
+        if (ImGui::GetCurrentContext()) {
+            if (ImGui::GetIO().BackendRendererUserData)
+                ImGui_ImplVulkan_Shutdown();
 
-            if (ImGui::GetIO( ).BackendPlatformUserData)
-                ImGui_ImplWin32_Shutdown( );
+            if (ImGui::GetIO().BackendPlatformUserData)
+                ImGui_ImplWin32_Shutdown();
 
-            ImGui::DestroyContext( );
+            ImGui::DestroyContext();
         }
 
-        CleanupDeviceVulkan( );
+        CleanupDeviceVulkan();
     }
 } // namespace VK
 
-static void CleanupRenderTarget( ) {
+static void CleanupRenderTarget() {
     for (uint32_t i = 0; i < RTL_NUMBER_OF(g_Frames); ++i) {
         if (g_Frames[i].Fence) {
             vkDestroyFence(g_Device, g_Frames[i].Fence, g_Allocator);
@@ -498,8 +409,8 @@ static void CleanupRenderTarget( ) {
     }
 }
 
-static void CleanupDeviceVulkan( ) {
-    CleanupRenderTarget( );
+static void CleanupDeviceVulkan() {
+    CleanupRenderTarget();
 
     if (g_DescriptorPool) {
         vkDestroyDescriptorPool(g_Device, g_DescriptorPool, g_Allocator);
@@ -517,6 +428,18 @@ static void CleanupDeviceVulkan( ) {
 static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
     if (!g_Device || H::bShuttingDown)
         return;
+
+    //! belazr changes 2 (https://github.com/bruhmoment21/UniversalHookX/issues/18)
+    if (g_ImageExtent.width == 0 || g_ImageExtent.height == 0) {
+        // We don't know the window size the first time so we just query the window handle.
+        RECT rect{};
+        GetClientRect(g_Hwnd, &rect);
+
+        g_ImageExtent.width = rect.right - rect.left;
+        g_ImageExtent.height = rect.bottom - rect.top;
+    }
+    //! belazr changes 2 end
+
 
     VkQueue graphicQueue = VK_NULL_HANDLE;
     const bool queueSupportsGraphic = DoesQueueSupportGraphic(queue, &graphicQueue);
@@ -553,14 +476,15 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
                 // We don't know the window size the first time. So we just set it to 4K.
                 info.renderArea.extent.width = 3840;
                 info.renderArea.extent.height = 2160;
-            } else {
+            }
+            else {
                 info.renderArea.extent = g_ImageExtent;
             }
 
             vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
         }
 
-        if (!ImGui::GetIO( ).BackendRendererUserData) {
+        if (!ImGui::GetIO().BackendRendererUserData) {
             ImGui_ImplVulkan_InitInfo init_info = { };
             init_info.Instance = g_Instance;
             init_info.PhysicalDevice = g_PhysicalDevice;
@@ -579,16 +503,16 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
             ImGui_ImplVulkan_CreateFontsTexture(fd->CommandBuffer);
         }
 
-        ImGui_ImplVulkan_NewFrame( );
-        ImGui_ImplWin32_NewFrame( );
-        ImGui::NewFrame( );
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
 
-        Menu::Render( );
+        Menu::Render();
 
-        ImGui::Render( );
+        ImGui::Render();
 
         // Record dear imgui primitives into command buffer
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData( ), fd->CommandBuffer);
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
 
         // Submit command buffer
         vkCmdEndRenderPass(fd->CommandBuffer);
@@ -623,10 +547,26 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
 
                 vkQueueSubmit(graphicQueue, 1, &info, fd->Fence);
             }
-        } else {
+        }
+        else {
             std::vector<VkPipelineStageFlags> stages_wait(waitSemaphoresCount, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 
+            //! belazr changes 3 (https://github.com/bruhmoment21/UniversalHookX/issues/18)
             VkSubmitInfo info = { };
+            info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            info.commandBufferCount = 1;
+            info.pCommandBuffers = &fd->CommandBuffer;
+
+            info.pWaitDstStageMask = stages_wait.data();
+            info.waitSemaphoreCount = waitSemaphoresCount;
+            info.pWaitSemaphores = pPresentInfo->pWaitSemaphores;
+
+            info.signalSemaphoreCount = waitSemaphoresCount;
+            info.pSignalSemaphores = pPresentInfo->pWaitSemaphores;
+            //! belazr changes 3 end
+
+
+            /*VkSubmitInfo info = { };
             info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
             info.commandBufferCount = 1;
             info.pCommandBuffers = &fd->CommandBuffer;
@@ -636,7 +576,7 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
             info.pWaitSemaphores = pPresentInfo->pWaitSemaphores;
 
             info.signalSemaphoreCount = 1;
-            info.pSignalSemaphores = &fsd->ImageAcquiredSemaphore;
+            info.pSignalSemaphores = &fsd->ImageAcquiredSemaphore;*/
 
             vkQueueSubmit(graphicQueue, 1, &info, fd->Fence);
         }
@@ -644,7 +584,7 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
 }
 
 static bool DoesQueueSupportGraphic(VkQueue queue, VkQueue* pGraphicQueue) {
-    for (uint32_t i = 0; i < g_QueueFamilies.size( ); ++i) {
+    for (uint32_t i = 0; i < g_QueueFamilies.size(); ++i) {
         const VkQueueFamilyProperties& family = g_QueueFamilies[i];
         for (uint32_t j = 0; j < family.queueCount; ++j) {
             VkQueue it = VK_NULL_HANDLE;
@@ -669,6 +609,6 @@ static bool DoesQueueSupportGraphic(VkQueue queue, VkQueue* pGraphicQueue) {
 #include <Windows.h>
 namespace VK {
     void Hook(HWND hwnd) { LOG("[!] Vulkan backend is not enabled!\n"); }
-    void Unhook( ) { }
+    void Unhook() { }
 } // namespace VK
 #endif
