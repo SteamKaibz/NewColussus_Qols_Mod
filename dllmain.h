@@ -796,19 +796,11 @@ __int64 __fastcall colorSmgh_Hook(__int64 a1, idDeclRenderParm* idDeclRenderParm
 
 
 
-
-
-
-
-
-
-
 typedef void(__fastcall* idKeyboardSmth_t)(__int64 a1, unsigned int a2);
 idKeyboardSmth_t p_idKeyboardSmth_t = nullptr;
 idKeyboardSmth_t p_idKeyboardSmth_t_Target = nullptr;
 
-void __fastcall idKeyboardSmth_Hook(__int64 a1, unsigned int a2) {
-
+void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a2) {
 
 	
 	static uint64_t lastFakeKeyPressMs = 0;
@@ -822,8 +814,8 @@ void __fastcall idKeyboardSmth_Hook(__int64 a1, unsigned int a2) {
 
 			idUsercmdGenLocalManager::debugUpdate(a2);
 
-			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(a1, a2, true);
-			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(a1, a2, false);
+			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, true);
+			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, false);
 
 			lastFakeKeyPressMs = K_Utils::EpochMillis();
 
@@ -832,7 +824,7 @@ void __fastcall idKeyboardSmth_Hook(__int64 a1, unsigned int a2) {
 	}	
 
 
-	return p_idKeyboardSmth_t(a1, a2);
+	return p_idKeyboardSmth_t(idUsercmdGenLocal_a1, a2);
 }
 
 

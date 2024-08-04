@@ -395,7 +395,7 @@ bool findGameWindow(std::string windowName) {
 		return false;
 	}
 
-	logInfo("findGameWindow: Succes Finding Window: %s", windowName.c_str());
+	logInfo("findGameWindow: Succes Finding  Window: %s", windowName.c_str());
 	return true;
 }
 
@@ -405,7 +405,7 @@ DWORD WINAPI ModMain() {
 
 	Console::Enable();
 
-	Config::setBuildType(buildType::nexusRelease);  //! dev, nexusDebug, nexusRelease   
+	Config::setBuildType(buildType::dev);  //! dev, nexusDebug, nexusRelease   
 
 
 	//! this could and sould be simplified....

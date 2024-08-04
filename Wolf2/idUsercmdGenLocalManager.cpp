@@ -45,7 +45,7 @@ void idUsercmdGenLocalManager::debugUpdate(unsigned int lastA2In_idKeyboardSmth_
 //	auto funcAddr = MemHelper::getFuncAddr(0xAA46F0);
 //	auto getBtnRefFunc = reinterpret_cast<getBtnRefSmth_AA46F0>(funcAddr);
 //
-//	//! from bp i got a1 = 0, a2 = 0, a3 =1, a4 = 0
+//	//! from bp i got a1 = 0, devicneNumMb_a2 = 0, a3 =1, a4 = 0
 //	__int64 result = getBtnRefFunc(0, 0, keyNum, 0);
 //	logInfo("testGetBtnRefForKeynum: result for keynum: %d : %p", (int)keyNum, (void*)result);
 //}
@@ -293,7 +293,7 @@ __int64 idUsercmdGenLocalManager::getBtnInfoFor(keyNum_t keyNum) {
     //! result: matches @ 0xAA46F0, sig direct: 40 53 48 83 EC 20 41 0F B6 D9 E8
 	auto funcAddr = MemHelper::getFuncAddr(0xAA46F0);
 	auto getBtnRefFunc = reinterpret_cast<getBtnRefSmth_AA46F0>(funcAddr);
-	//! from bp i got a1 = 0, a2 = 0, a3 =1, a4 = 0
+	//! from bp i got a1 = 0, devicneNumMb_a2 = 0, a3 =1, a4 = 0
 	__int64 result = getBtnRefFunc(0, 0, keyNum, 0);
 	if (MemHelper::isBadReadPtr((void*)result)) {
 		//logWarn("getBtnInfoFor could not find any BtnInfo for input ... returning 0 ");
@@ -309,6 +309,25 @@ cmdGenButton_t idUsercmdGenLocalManager::getCmdGenButtonBoundTo(keyNum_t keyNum)
 		return btnInfo->cmdGenButtonVal;
 	}
 	return UB_NONE;
+}
+
+//todo this will return the keyNum_t for any bound action, however still need to test what happens if user is using only a controller as this will return a keyboard key as they are evaluated first(?)
+keyNum_t idUsercmdGenLocalManager::getKeyNumForCmd(cmdGenButton_t inputCmdGenBtn) {
+
+    for (int keynum = (int)K_ESCAPE; keynum < (int)K_LAST_KEY; keynum++) {
+
+        auto cmdGenBtn = getCmdGenButtonBoundTo((keyNum_t)keynum);
+        if (cmdGenBtn == inputCmdGenBtn) {
+            std::string keyNumStr = getkeyNum_tAsStr((keyNum_t)keynum);
+            std::string inputCmdGenBtnStr = getCmdGenButtonAsStr(inputCmdGenBtn);
+            logInfo("getKeyNumForCmd: inputCmdGenBtnStr: %s is bound to keyNum: %s ", inputCmdGenBtnStr.c_str(), keyNumStr.c_str());
+            return (keyNum_t)keynum;
+        }
+    }
+
+    std::string inputCmdGenBtnStr = getCmdGenButtonAsStr(inputCmdGenBtn);
+    logErr("getKeyNumForCmd: failed to find keyNum for cmd: %s returning K_NONE", inputCmdGenBtnStr.c_str());
+    return K_NONE;
 }
 
 
@@ -353,7 +372,7 @@ void idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum() {
 
 
 
-void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int a2, bool isKeyDown)
+void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMb_a2, bool isKeyDown)
 {
     if (!m_sendKeyFuncAddr) {
         //! result: matches @ 0xAE6FE0, sig direct: 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 48 8B 81 ? ? ? ? 8B F2 49 63 E8
@@ -370,13 +389,13 @@ void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGen
     }
 
 	auto idUsercmdGenFunc = reinterpret_cast<idUsercmdGenLocalSmth_t>(m_sendKeyFuncAddr);
-	idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, m_current_use_keyNum, (char)isKeyDown); 
-	//idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
-	//idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
+	idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, m_current_use_keyNum, (char)isKeyDown); 
+	//idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
+	//idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
 }
 
 
-//void idUsercmdGenLocalManager::sendFakeKeyPress(__int64 idUsercmdGenLocal_a1, keyNum_t keyNum, unsigned int a2, bool isKeyDown)
+//void idUsercmdGenLocalManager::sendFakeKeyPress(__int64 idUsercmdGenLocal_a1, keyNum_t keyNum, unsigned int devicneNumMb_a2, bool isKeyDown)
 //{
 //    if (!m_sendKeyFuncAddr) {
 //        //! result: matches @ 0xAE6FE0, sig direct: 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 48 8B 81 ? ? ? ? 8B F2 49 63 E8
@@ -389,9 +408,9 @@ void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGen
 //    }   
 //
 //    auto idUsercmdGenFunc = reinterpret_cast<idUsercmdGenLocalSmth_t>(m_sendKeyFuncAddr);
-//    idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, keyNum, (char)isKeyDown);
-//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
-//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
+//    idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, keyNum, (char)isKeyDown);
+//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
+//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
 //}
 
 //void idUsercmdGenLocalManager::sendFakeZoomKeyPress(bool isKeyDown)
@@ -412,8 +431,8 @@ void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGen
 //
 //    auto idUsercmdGenFunc = reinterpret_cast<idUsercmdGenLocalSmth_t>(m_sendKeyFuncAddr);
 //    idUsercmdGenFunc(m_idUsercmdGenLocal, 0, K_MOUSE2, (char)isKeyDown);
-//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
-//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
+//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
+//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
 //}
 
 

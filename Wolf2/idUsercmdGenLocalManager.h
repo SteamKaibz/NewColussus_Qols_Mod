@@ -350,6 +350,8 @@ public:
 
 	static cmdGenButton_t getCmdGenButtonBoundTo(keyNum_t keyNum);
 
+	static keyNum_t getKeyNumForCmd(cmdGenButton_t cmdBtn);
+
 	static keyNum_t getUseActionKeyNum();
 
 	static cmdGenButton_t getUseKeyGenButton();
