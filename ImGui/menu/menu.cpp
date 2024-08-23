@@ -37,40 +37,14 @@ namespace Menu {
        config.OversampleV = true;
        config.FontDataOwnedByAtlas = false;          
       
-       icons_font_awesome = io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 40.0f, &config, icon_ranges);        
-
-
-
-
-          
-    
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
-
-
-        
-
-       
-
-
+       icons_font_awesome = io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 40.0f, &config, icon_ranges);      
 
     }
 
-    void Render( ) { 
 
-                    
+
+
+    void Render( ) {                     
 
         if (bShowDebugWindow) {  
             DebugGui::showDebugWindow();
@@ -104,13 +78,43 @@ namespace Menu {
     }
 
 
-    bool isDuplicateKeyError() {
+   /* bool isDuplicateKeyError() {
         auto isError = (modSettings.normalSpeedKeyVkCode == modSettings.fastForwardKeyVkCode ||
             modSettings.normalSpeedKeyVkCode == modSettings.flashLightKeyVkCode ||
             modSettings.fastForwardKeyVkCode == modSettings.flashLightKeyVkCode ||
             modSettings.normalSpeedKeyVkCode == modSettings.fastForwardKeyVkCode);
         return isError;
+    }*/
+
+
+    bool isDuplicateKeyError() {
+        std::unordered_set<unsigned int> uniqueKeys;
+
+        // Only add keys that are not 0 to the set
+        if (modSettings.normalSpeedKeyVkCode != 0) {
+            uniqueKeys.insert(modSettings.normalSpeedKeyVkCode);
+        }
+        if (modSettings.fastForwardKeyVkCode != 0) {
+            uniqueKeys.insert(modSettings.fastForwardKeyVkCode);
+        }
+        if (modSettings.flashLightKeyVkCode != 0) {
+            uniqueKeys.insert(modSettings.flashLightKeyVkCode);
+        }
+        if (modSettings.highFrameMvtFixKeyVkCode != 0) {
+            uniqueKeys.insert(modSettings.highFrameMvtFixKeyVkCode);
+        }
+
+        // Count the number of non-zero keys
+        int numBoundKeys = 0;
+        if (modSettings.normalSpeedKeyVkCode != 0) numBoundKeys++;
+        if (modSettings.fastForwardKeyVkCode != 0) numBoundKeys++;
+        if (modSettings.flashLightKeyVkCode != 0) numBoundKeys++;
+        if (modSettings.highFrameMvtFixKeyVkCode != 0) numBoundKeys++;
+
+        // If the size of the set is less than the number of non-zero keys, there are duplicates
+        return uniqueKeys.size() < numBoundKeys;
     }
+
 
     void LoadSettings(ModSettings modSettingsFromFile)
     {
@@ -199,6 +203,9 @@ namespace Menu {
             
                 modSettings.isAdsToggle = j.value("isAdsToggle", false);
                 modSettings.zoomKeyVkCode = j.value("zoomKeyVkCode", VK_RBUTTON);  
+
+                modSettings.highFrameMvtFixKeyVkCode = j.value("highFrameMvtFixKeyVkCode", 0);
+
 
                 modSettings.isUseCustomHud = j.value("isUseCustomHud", false);
                 modSettings.hudConfiguration = j.value("hudConfiguration", (int)HUDConfigV2::BiggerHud);
@@ -335,6 +342,8 @@ namespace Menu {
 
         j["isAdsToggle"] = modSettings.isAdsToggle;
         j["zoomKeyVkCode"] = modSettings.zoomKeyVkCode;  
+
+        j["highFrameMvtFixKeyVkCode"] = modSettings.highFrameMvtFixKeyVkCode;
 
         j["isUseCustomHud"] = modSettings.isUseCustomHud;
         j["hudConfiguration"] = modSettings.hudConfiguration;
@@ -675,11 +684,12 @@ namespace Menu {
 
     void insertToolTipSameLine(const char* tooltipText) {
         ImGui::SameLine();
-        ImGui::Text("    ");
-        ImGui::SameLine();        
-        ImGui::PushFont(icons_font_awesome);
+        ImGui::Text("  [?]");
+        //ImGui::SameLine();   
+
+        /*ImGui::PushFont(icons_font_awesome);
         ImGui::Text(ICON_FA_QUESTION_CIRCLE);
-        ImGui::PopFont();
+        ImGui::PopFont();*/
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip(tooltipText);
         }
@@ -1330,6 +1340,73 @@ namespace Menu {
                 ImGui::NewLine();                 
                 ImGui::Checkbox("Free Lean Only", &Menu::modSettings.isFreeLeanOnly);
                 insertToolTipSameLine("If box is checked, it will disable the auto positioning/sliding of the player when leaning, which may gets rid of the frequent twitches/glitches that occur  (game default: false)");
+
+
+                ImGui::NewLine();
+                ImGui::NewLine();
+                static bool isWaitingForHighFPSFixKeyPress = false;
+                ImGui::Text("Unstuck Player Key Bind:  ");
+               
+
+                if (!isWaitingForHighFPSFixKeyPress) {
+                    std::string highFpsFixKeyName = ModSettings::keyCodeToString(Menu::modSettings.highFrameMvtFixKeyVkCode);
+                    ImGui::SameLine();
+                    if (Menu::isDuplicateKeyError()) { 
+                        ImGui::PushStyleColor(ImGuiCol_Text, redColor);
+                        ImGui::Text("%s\t", highFpsFixKeyName.c_str(), Menu::modSettings.highFrameMvtFixKeyVkCode);
+                        ImGui::PopStyleColor();
+                    }
+                    else {
+                        ImGui::Text("%s\t", highFpsFixKeyName.c_str(), Menu::modSettings.highFrameMvtFixKeyVkCode);
+                    }
+                }
+                else {
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, orangeColor);
+                    ImGui::Text("Press New Unstuck Player Key...\t");
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Set Bind Key")) {
+                    isWaitingForHighFPSFixKeyPress = true;
+                }
+                ImGui::SameLine();
+                ImGui::Text("  ");
+                ImGui::SameLine();
+                if (ImGui::Button("Unbind Key")) {
+                    Menu::modSettings.highFrameMvtFixKeyVkCode = 0; //! unbinding key.
+                }
+
+                insertToolTipSameLine("This is only useful if you play above 60fps.\nThe higher your framerate is, the more chance you'll get stuck on very small obstacles on the ground.\nThis can be a problem if you try to be stealthy as you have to jump => enemy will hear you\nThis bind will instead lower the framerate to 60fps for an instant, giving you time to get past the obstacle\njust unbind this key if you don't want that feature");
+
+                if (Menu::isDuplicateKeyError()) {
+                    ImGui::NewLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, redColor);
+                    ImGui::Text("KEY ALREADY BOUND TO ANOTHER MOD ACTION !");
+                    ImGui::PopStyleColor();
+                }
+
+                if (isWaitingForHighFPSFixKeyPress && Menu::lastKeyPressed != -1) {
+                    Menu::modSettings.highFrameMvtFixKeyVkCode = Menu::lastKeyPressed;
+                    isWaitingForHighFPSFixKeyPress = false;
+                    Menu::lastKeyPressed = -1;
+                }
+                ImGui::NewLine();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
                 ImGui::NewLine();  

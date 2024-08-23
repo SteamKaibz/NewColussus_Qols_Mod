@@ -55,7 +55,6 @@ public:
 
     unsigned int fastForwardKeyVkCode;
     unsigned int normalSpeedKeyVkCode;
-
    
     unsigned int flashLightKeyVkCode;
     ImVec4 headlightColor;
@@ -65,6 +64,8 @@ public:
     float headlightLightEnd_X;          
     bool isShowFlashLightIcon;
 
+
+    unsigned int highFrameMvtFixKeyVkCode;
 
     float handgunAdsFov;
     float handgunAdsFovSensMultiplier;

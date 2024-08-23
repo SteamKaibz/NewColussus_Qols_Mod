@@ -152,7 +152,11 @@ bool idCvarManager::setModInitCvars() {
 bool idCvarManager::setCriticalCvars() {
 	logInfo("enforcing critical Cvars");
 	bool isError = false;
+	
 
+	/*if (Config::IsForceNoModUi) {
+		isError = !setCvar("menu_showOptionForDevMenu", "0") || isError;
+	}*/
 	if(ModSettingsManager::getIsUseImgui()) {
 		isError = !setCvar("menu_showOptionForDevMenu", "1") || isError;
 	}

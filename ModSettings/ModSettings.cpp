@@ -11,6 +11,11 @@ void ModSettings::reset() {
 
 
 std::string ModSettings::keyCodeToString(int keyCode) {
+   
+    if (keyCode == 0) {
+        return "Not Bound";
+    }
+    
     if (keyCode >= VK_F1 && keyCode <= VK_F24) {
         return "F" + std::to_string(keyCode - VK_F1 + 1);
     }
@@ -135,6 +140,8 @@ void ModSettings::initializeMembers() {
     headlightLightEnd_X = modSettingsConst::headlightEndXDef;
     isShowFlashLightIcon = true;
 
+
+    highFrameMvtFixKeyVkCode = 0;
    
 
     handgunAdsFov = 85.0f;

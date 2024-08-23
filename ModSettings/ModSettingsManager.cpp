@@ -207,6 +207,11 @@ unsigned int ModSettingsManager::getFlashLightKeyCode() {
 	return m_modSettings.flashLightKeyVkCode;
 }
 
+unsigned int ModSettingsManager::getHighFrameMvtFixKeyVkCode()
+{
+	return m_modSettings.highFrameMvtFixKeyVkCode;
+}
+
 
 bool ModSettingsManager::isSilentProtagonist() {
 	return m_modSettings.isSilentProtagonist;

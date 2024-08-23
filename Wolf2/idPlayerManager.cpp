@@ -23,6 +23,27 @@
 
  }
 
+ void idPlayerManager::triggerHighFramerateMvtFix()
+ {
+	 bool isAdaptiveTick = (bool)idCvarManager::getCvarInt("com_adaptiveTick");
+	 if (isAdaptiveTick) {
+		 idCvarManager::setCvar("com_adaptiveTick", "0");
+		 logInfo("triggerHighFramerateMvtFix, setting com_adaptiveTick to 0...");
+		 last_com_adaptiveTickCmdSetMs = K_Utils::EpochMillis();
+	 }
+ }
+
+ void idPlayerManager::checkForHighFramerateMvtFixTimerEnd()
+ {
+	 if (K_Utils::EpochMillis() - last_com_adaptiveTickCmdSetMs > 200) {
+		 bool isAdaptiveTick = (bool)idCvarManager::getCvarInt("com_adaptiveTick");
+		 if (!isAdaptiveTick) {
+			 idCvarManager::setCvar("com_adaptiveTick", "1");
+			 logInfo("checkForHighFramerateMvtFixTimerEnd: setting com_adaptiveTick back to 1...");
+		 }
+	 }
+ }
+
 
 void idPlayerManager::handleChange(idPlayer* idPlayerPtr)
 {

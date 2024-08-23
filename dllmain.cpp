@@ -342,10 +342,7 @@ bool InitializeHooksV2() {
 
 
 
-	pOriginalWndProc = (WNDPROC)SetWindowLongPtr(hWindow, GWLP_WNDPROC, (LONG_PTR)&HookedWndProc);
-
-
-	
+	pOriginalWndProc = (WNDPROC)SetWindowLongPtr(hWindow, GWLP_WNDPROC, (LONG_PTR)&HookedWndProc);	
 
 
 
@@ -404,8 +401,9 @@ bool findGameWindow(std::string windowName) {
 DWORD WINAPI ModMain() {
 
 	Console::Enable();
-
-	Config::setBuildType(buildType::dev);  //! dev, nexusDebug, nexusRelease   
+	
+	//? this about updating mod version if you update.
+	Config::setBuildType(buildType::nexusDebug);  //! dev, nexusDebug, nexusRelease   
 
 
 	//! this could and sould be simplified....
@@ -502,13 +500,21 @@ DWORD WINAPI ModMain() {
 	}	
 
 
-	
+	/*if (Config::IsForceNoModUi) {
+		logWarn("");
+		logWarn("g_isForceNoUI is true, user will not be able be able to use mod UI in the game");
+		logWarn("g_isForceNoUI is true, user will not be able be able to use mod UI in the game");
+		logWarn("g_isForceNoUI is true, user will not be able be able to use mod UI in the game");
+		logWarn("g_isForceNoUI is true, user will not be able be able to use mod UI in the game");
+		logWarn("");
+	}*/
 
 	
 
 	uint64_t lastGetAsyncKeyPressMs = 0;
 	uint64_t lastdebugUseSystemPrintMs = 0;
 	uint64_t lastIniFileWatcherCheckMs = 0;
+	uint64_t lastHighFpxFixCheckMs = 0;
 
 
 
@@ -529,11 +535,13 @@ DWORD WINAPI ModMain() {
 			continue;                     
 		}
 
+		
+
 		//! wait until game menu is initialized before imgui init
+		//? adding an extra static bool to force no ui and hopefully help issues with user who can not get a json file generated and as a result can not use the mod.
 		if (ModSettingsManager::getIsUseImgui() && ImGuiManager::isInitFlag()) {
 			initImguiV2();         
 		}
-
 
 
 		if (MenuStateManager::isNotMenu() && cachedCvarsManager::isWindowFocused()) {
@@ -541,8 +549,15 @@ DWORD WINAPI ModMain() {
 
 			ADS_Manager::checkZoomBtnState();
 
-
 		}		
+
+		//! 23/8/24 adding this to fix the player stuck on ledges at high framerate. we could potentially make this system trigger automatically but it will do for now.
+		if (K_Utils::EpochMillis() - lastHighFpxFixCheckMs > 50) {
+
+			idPlayerManager::checkForHighFramerateMvtFixTimerEnd();
+
+			lastHighFpxFixCheckMs = K_Utils::EpochMillis();
+		}
 		
 		
 

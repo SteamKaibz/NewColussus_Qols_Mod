@@ -59,6 +59,7 @@ public:
 
     static unsigned int getFlashLightKeyCode();
 
+    static unsigned int getHighFrameMvtFixKeyVkCode();
 
     static bool isCustomCrosshairEnabled();
     static bool isAlarmIconsEnabled();

@@ -144,7 +144,7 @@ bool g_debugIsDemonPlayer = false;
 gameState_t g_lastGameState = GAMESTATE_UNINITIALIZED;
 
 std::string g_debugLastCurrentGameMode = "unknow Game Mode";
-unsigned int g_sleepTimeMainLoopMs = 10;
+unsigned int g_sleepTimeMainLoopMs = 20;
 
 std::string globalVariableString;
 
@@ -168,6 +168,9 @@ bool g_debugReticleScale = true;
 static std::vector<std::string> matrNamesVec;
 
 std::string g_plusSignStr = "+";
+
+
+//bool g_isForceNoUI = true;
 
 HINSTANCE DllHandle;
 HWND hWindow = NULL;
@@ -234,8 +237,16 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 		return p_idMenuManager_Shell_Update_t(idMenuManager_Shell_a1, a2); //? retuning.
 	}
 
-
 	idCvarManager::setCvar("menu_showOptionForDevMenu", "1");
+
+	//! temporary to check if users with intel gpu can still use the mod
+	/*if (Config::IsForceNoModUi) {
+		idCvarManager::setCvar("menu_showOptionForDevMenu", "0");
+	}
+	else {
+		idCvarManager::setCvar("menu_showOptionForDevMenu", "1");
+	}*/
+
 
 	if (currentMenuIndex == SHELL_SCREEN_DEV) {            		
 		idCvarManager::setCvar("in_unlockMouseInMenus", "1");       
@@ -1006,6 +1017,9 @@ LRESULT CALLBACK HookedWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				else {
 					idLightManager::toggleHeadLight();
 				}
+			}
+			else if (wParam == ModSettingsManager::getHighFrameMvtFixKeyVkCode()) {
+				idPlayerManager::triggerHighFramerateMvtFix();
 			}
 		}
 	}

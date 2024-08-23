@@ -67,8 +67,9 @@ void Tests::PrintIdPlayerInfo() {
 
 
     logInfo("idPlayer::idPlayerVolatile: idPlayerHud addr: %p", (idPlayerVolatile + 0x3BC0));
-
     logInfo("idPlayer::idPlayerVolatile: zoomedIn addr: %p", (idPlayerVolatile + 0xD8 + 0x68));
+    logInfo("idPlayer::idPlayerVolatile: idEnvironmentAnalyzer addr: %p", (idPlayerVolatile + 0xB128));
+    logInfo("idPlayer::idPlayerVolatile: idHavokPhysics_Player addr: %p", (idPlayerVolatile + 0x9C88));
    
 
 
