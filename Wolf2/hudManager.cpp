@@ -122,17 +122,17 @@ bool hudManager::isHudHiddenAlt() {
 	return false;	
 }
 
-
-leanMode_t hudManager::getLeanMode() {
-
-	idHudInfo* idHudInfoPtr = idPlayerManager::getIdHudInfo();
-	if (idHudInfoPtr) {
-		return idHudInfoPtr->reticle.leanDirIndication;
-	}
-	logWarn("getLeanMode: failed to get leanmode");
-	return LEANMODE_ANY;
-
-}
+//? this seems to no have any data...what you want is forceLeanMode  value in idEnvironmentAnalyzer
+//leanMode_t hudManager::getLeanMode() {
+//
+//	idHudInfo* idHudInfoPtr = idPlayerManager::getIdHudInfo();
+//	if (idHudInfoPtr) {
+//		return idHudInfoPtr->reticle.leanDirIndication;
+//	}
+//	logWarn("getLeanMode: failed to get leanmode");
+//	return LEANMODE_ANY;
+//
+//}
 
 
 //idHudInfo* hudManager::getidHudInfo() {
@@ -148,27 +148,47 @@ leanMode_t hudManager::getLeanMode() {
 //}
 
 
-
-std::string hudManager::inGuiGetDualWieldInfo() {
+//? 17/9/24 i realized that this function check doen't really check for dual wield, it checks for dual ammo, it DOES NOT MEAN that you have a weapon in each hands it only means that both weapons use the same ammo. (WEAPONAMMO_DUALAMMO). So this func is useless to us atm, i'll just leave it here for education purpose.
+std::string hudManager::debug_GetDualAmmoInfoStr() {
 
 	idHudInfo* idHudInfoPtr = idPlayerManager::getIdHudInfo();
 	if (idHudInfoPtr) {
 		int flags = idHudInfoPtr->weaponAmmoStatus.getFlags();
 		bool isDualWield = (idHudInfoPtr->weaponAmmoStatus.getFlags() & weaponAmmoFlags_t::WEAPONAMMO_DUALAMMO) != 0;
 		if (isDualWield) {
-			return "Hud Info : Dual Wield Weapon Active. Flags: " + K_Utils::intToHexString(flags);
+			return "Hud Info : Dual Ammo Active (Meaning Both weapon are the same). Flags: " + K_Utils::intToHexString(flags);
 		}
 		else {
-			return "Hud Info : single wield weapon Active. Flags: " + K_Utils::intToHexString(flags);
+			return "Hud Info : single ammo Active. (If holding 2 weaps, they are NOT the same) Flags: " + K_Utils::intToHexString(flags);
 		}
 	}
 	else {
-
-	}return "Hud Info : bad ptr !!! ";
-
-	
+		return "Hud Info : bad ptr !!! ";
+	}
 }
 
+//? this fails and i don't want to make it better, as we should have a better way to get if dual wield now
+//bool hudManager::isDualWielding() {
+//
+//	idHudInfo* idHudInfoPtr = idPlayerManager::getIdHudInfo();
+//	if (idHudInfoPtr) {
+//		
+//
+//		return (*(char*) ((char*)idHudInfoPtr + 0x188)) == 1;
+//	}
+//	return false;
+//
+//}
+
+
+void hudManager::debugLogWeaponInfo() {
+
+	idHudInfo* idHudInfoPtr = idPlayerManager::getIdHudInfo();
+	if (idHudInfoPtr) {
+		logInfo("debugLogWeaponInfo: &idHudInfoPtr->weaponAmmoStatus: %p", &idHudInfoPtr->weaponAmmoStatus);		
+	}
+
+}
 
 
 

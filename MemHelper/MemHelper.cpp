@@ -213,7 +213,7 @@ int MemHelper::FindHardcodedOffset(uintptr_t instructionStartAddress, const int 
 }
 
 
-
+//! update 14/9/24 this should get rid of the "argument': conversion from 'unsigned long' to '_Ty', possible loss of data" build warning:
 static auto pattern_to_byte = [](const char* pattern)
 	{
 		auto bytes = std::vector<char>{};
@@ -231,11 +231,13 @@ static auto pattern_to_byte = [](const char* pattern)
 			}
 			else
 			{
-				bytes.push_back(strtoul(current, &current, 16));
+				// Cast the result of strtoul to char to avoid the warning
+				bytes.push_back(static_cast<char>(strtoul(current, &current, 16)));
 			}
 		}
 		return bytes;
 	};
+
 
 DWORD64 MemHelper::PatternScan(const char* szModule, const char* signature)
 {
@@ -279,17 +281,18 @@ DWORD64 MemHelper::PatternScan(const char* szModule, const char* signature)
 	return 0;
 }
 
-DWORD64 MemHelper::ModulePatternScan(std::string moduleName, std::string scanFriendlyName, const char* signature)
+//! New version 12/9/24
+DWORD64 MemHelper::ModulePatternScan(std::string scanFriendlyName, const char* signature)
 {
-	logDebug("ModulePatternScan");
 
 	MODULEINFO mInfo;
-	HMODULE hModule = GetModuleHandleA(moduleName.c_str());
+	//HMODULE hModule = GetModuleHandleA(Config::getCurrentModuleNameStrToLower().c_str());
+	HMODULE hModule = GetModuleHandleA(GetGameExeNameToLower().c_str());
 
 	if (hModule == nullptr)
 	{
-		logErr("GetModuleHandleA failed to find the module: %s returning", moduleName.c_str());
-		return 0;            
+		logErr("ModulePatternScan: failed to find the module: %s returning", GetGameExeNameToLower().c_str());
+		return 0;
 	}
 
 	K32GetModuleInformation(GetCurrentProcess(), hModule, &mInfo, sizeof(MODULEINFO));
@@ -298,26 +301,31 @@ DWORD64 MemHelper::ModulePatternScan(std::string moduleName, std::string scanFri
 	auto patternBytes = pattern_to_byte(signature);
 
 	DWORD64 patternLength = patternBytes.size();
-	auto data = patternBytes.data();
+	const char* data = patternBytes.data();
 
-	for (DWORD64 i = 0; i < sizeOfImage - patternLength; i++)
+	for (DWORD64 i = 0; i <= sizeOfImage - patternLength; i++)
 	{
+		const char* scanAddr = (const char*)(base + i);
 		bool found = true;
+
 		for (DWORD64 j = 0; j < patternLength; j++)
 		{
-			char a = '\?';
-			char b = *(char*)(base + i + j);
-			found &= data[j] == a || data[j] == b;
+			if (data[j] != '\?' && data[j] != scanAddr[j])
+			{
+				found = false;
+				break; // Early exit on mismatch
+			}
 		}
+
 		if (found)
 		{
-			DWORD64 result = base + i;
-			logInfo("PatternScan Success for %s Found Addr: %p", scanFriendlyName.c_str(), (void*)result);
+			DWORD64 result = (DWORD64)scanAddr;
+			logInfo("ModulePatternScan: PatternScan Success for %s Found Addr: %p", scanFriendlyName.c_str(), (void*)result);
 			return result;
 		}
 	}
 
-	logErr("!!! PatternScan failed for: %s", scanFriendlyName.c_str());
+	logErr("ModulePatternScan: !!! PatternScan failed for: %s", scanFriendlyName.c_str());
 	return 0;
 }
 

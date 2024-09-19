@@ -27,6 +27,7 @@
 #include "hudExtrasGui.h"
 #include "../../Wolf2/idLightManager.h"
 #include "../../Debug/Debug.h"
+#include "liveStatsGui.h"
 
 
 
@@ -48,12 +49,16 @@ namespace Menu {
     inline bool bShowWarningWindow = true;
     inline bool bShowFastForwardIcon = true;
 
+    inline bool bTEMPisShowStats = false;
+
     inline ImFont* icons_font_awesome = nullptr;
 
     inline auto orangeColor = ImVec4(1.0f, 0.65f, 0.0f, 1.0f);
     inline auto yellowColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     inline auto redColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
     inline auto grayColor = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);
+    inline auto whiteColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    inline auto invisibleColor = ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
 
 
     inline const char* hudChoiceItemsV2[] = {

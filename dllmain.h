@@ -76,11 +76,7 @@
 #include "Wolf2/idRenderParmManager.h"
 #include "Wolf2/hintManager.h"
 #include "Wolf2/languageManager.h"
-
-
-
-
-
+#include "TypeGenerator/IdaScriptsGen.h"
 
 
 
@@ -207,7 +203,7 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 
 	MenuStateManager::acquireidMenuManager_ShellPtr(idMenuManager_Shell_a1);
 
-	timescaleManager::setDefaultSpeed();	
+	timescaleManager::resetSpeed();
 
 
 	if (!ModSettingsManager::getIsUseImgui()) {
@@ -237,7 +233,10 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 		return p_idMenuManager_Shell_Update_t(idMenuManager_Shell_a1, a2); //? retuning.
 	}
 
-	idCvarManager::setCvar("menu_showOptionForDevMenu", "1");
+
+	idCmdManager::executeCmd("menu_showOptionForDevMenu 1");
+	
+	
 
 	//! temporary to check if users with intel gpu can still use the mod
 	/*if (Config::IsForceNoModUi) {
@@ -248,8 +247,9 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 	}*/
 
 
-	if (currentMenuIndex == SHELL_SCREEN_DEV) {            		
-		idCvarManager::setCvar("in_unlockMouseInMenus", "1");       
+	if (currentMenuIndex == SHELL_SCREEN_DEV) {
+		idCmdManager::executeCmd("in_unlockMouseInMenus 1");
+		//idCvarManager::setCvar("in_unlockMouseInMenus", "1");       
 		Menu::bShowMenu = true;
 		
 	}
@@ -258,7 +258,8 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 		if (!idRenderModelGuiManager::isWhiteMaterialacquired()) {
 			idRenderModelGuiManager::acquireWhiteMaterial();
 		}
-		idCvarManager::setCvar("in_unlockMouseInMenus", "0");
+		idCmdManager::executeCmd("in_unlockMouseInMenus 0");
+		//idCvarManager::setCvar("in_unlockMouseInMenus", "0");
 		Menu::bShowMenu = false;
 
 	}
@@ -294,8 +295,9 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 		}
 
 		if (lastMenuIndex == SHELL_SCREEN_CONTROLS) {
-			logInfo("shell hook: getting out of controls screen: checking if new key has been bound to _use");
+			logInfo("shell hook: getting out of controls screen: updating cached bound keys...");
 			idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum();
+			idUsercmdGenLocalManager::tryCacheGameFireKeysBinds();
 		}
 
 		std::string lastMenuStr = MenuStateManager::shellScreenToString(lastMenuIndex);
@@ -365,11 +367,11 @@ closeIdConsoleSmth_A8D1E0_t p_closeIdConsoleSmth_A8D1E0_Target = nullptr;
 
 __int16 __fastcall closeIdConsoleSmth_A8D1E0_Hook(__int64 a1, char a2) {
 	
-	logInfo("console is closing, checking for use keybind change...");
+	logInfo("console is closing, checking for potential use keybind change...");
 	idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum();
+	//todo not sure if we should check for fire keys binds change here...i can see the state issues coming....
 
-	idCvarManager::setCriticalCvars();
-
+	idCmdManager::setCriticalCvars();
 
 	return p_closeIdConsoleSmth_A8D1E0(a1, a2);
 }
@@ -813,6 +815,9 @@ idKeyboardSmth_t p_idKeyboardSmth_t_Target = nullptr;
 
 void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a2) {
 
+
+	//idUsercmdGenLocalManager::debugUpdate(a2);
+
 	
 	static uint64_t lastFakeKeyPressMs = 0;
 	static uint64_t lastFakeZoomKeyPressMs = 0;
@@ -823,8 +828,7 @@ void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a
 
 			logInfo("idKeyboardSmth_Hook triggering use key press n release");
 
-			idUsercmdGenLocalManager::debugUpdate(a2);
-
+			
 			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, true);
 			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, false);
 
@@ -842,7 +846,7 @@ void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a
 
 
 
-
+//! 0xFEB3E0
 typedef char(__fastcall* idPlayer_UseCheck_t_FEB3E0)(idPlayer* idPlayer_a1, __int64* gameTime_a2);  
 
 idPlayer_UseCheck_t_FEB3E0 p_idPlayer_UseCheck = nullptr;
@@ -881,6 +885,43 @@ char __fastcall idPlayer_UseCheck_Hook(idPlayer* idPlayer_a1, __int64* gameTime_
 
 
 
+//! __int64 __fastcall idUsercmdGenLocal_SendKeySmth_AE6FE0(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, unsigned int keyNum_a3, char isDown_a4)
+typedef __int64(__fastcall* idUsercmdGenLocal_SendKeySmth_t)(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, keyNum_t keyNum_a3, char isDown_a4);
+idUsercmdGenLocal_SendKeySmth_t p_SendKeySmth_t = nullptr;
+idUsercmdGenLocal_SendKeySmth_t p_SendKeySmth_t_Target = nullptr;
+
+__int64 __fastcall SendKeySmth_t_Hook(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, keyNum_t keyNum_a3, char isDown_a4) {	
+
+	idUsercmdGenLocalManager::dbgLogHookArgsChanges(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+
+
+	/*if (!ModSettingsManager::isSwapBindsWhenDualWielding()) {
+		return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+	}
+
+	if (!idUsercmdGenLocalManager::isFireKeysBindsSet()) {
+		logErr("FireKeys are not set, dual wielding key swap mod feature can not work, please bind keys to fire and zoom keys");
+		return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+	}
+
+	if (idPlayerManager::isDualWielding()) {
+		if (idUsercmdGenLocalManager::isAttack1Key(keyNum_a3)) {
+			keyNum_a3 = K_JOY_TRIGGER1;
+		}
+		else if (idUsercmdGenLocalManager::isZoomKey(keyNum_a3)) {
+			keyNum_a3 = K_JOY_TRIGGER2;
+		}
+	}*/
+		
+	return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+}
+
+
+
+
+
+
+
 
 
 //! game console log
@@ -911,18 +952,47 @@ void __cdecl IdLib_PrintfHook_1238530(const char* format, ...) {
 
 
 
-
-
-
-
-
 typedef char(__fastcall* idPlayerHandleZoomSmth_t)(idPlayer* idPlayer_a1, char a2, __int64 a3);
 idPlayerHandleZoomSmth_t p_idPlayerHandleZoomSmth = nullptr;
 idPlayerHandleZoomSmth_t p_idPlayerHandleZoomSmth_Target = nullptr;
 
 char __fastcall idPlayerHandleZoomSmth_Hook(idPlayer* idPlayer_a1, char a2, __int64 a3) {
-
 	
+	idEntity* entity = (idEntity*)idPlayer_a1;
+	idUsercmdGenLocalManager::DBG_Buttons = entity->playerController->ucmdTracker1.usercmd.buttons;
+
+	//! this works !
+	//idUsercmdGenLocalManager::setButtonFlag(entity->playerController->ucmdTracker1.usercmd.buttons, BUTTON_ZOOM, true);
+
+	if (ModSettingsManager::isSwapBindsWhenDualWielding() && idPlayerManager::isDualWielding(idPlayer_a1)) {
+
+		idUsercmdGenLocalManager::invertZoomAndAttack(entity->playerController->ucmdTracker1.usercmd.buttons);
+	}
+
+	/*idUsercmdGenLocalManager::invertZoomAndAttack(entity->playerController->ucmdTracker1.usercmd.buttons);
+
+
+	if (!ModSettingsManager::isSwapBindsWhenDualWielding()) {
+		return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+	}
+
+	if (!idUsercmdGenLocalManager::isFireKeysBindsSet()) {
+		logErr("FireKeys are not set, dual wielding key swap mod feature can not work, please bind keys to fire and zoom keys");
+		return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+	}
+
+	if (idPlayerManager::isDualWielding()) {
+		if (idUsercmdGenLocalManager::isAttack1Key(keyNum_a3)) {
+			keyNum_a3 = K_JOY_TRIGGER1;
+		}
+		else if (idUsercmdGenLocalManager::isZoomKey(keyNum_a3)) {
+			keyNum_a3 = K_JOY_TRIGGER2;
+		}
+	}*/
+
+
+
+
 
 	if (!ModSettingsManager::isAdsToggleEnabled()) {
 		if (ADS_Manager::getPatchState() != zoomCodeOriginal) {
@@ -931,16 +1001,12 @@ char __fastcall idPlayerHandleZoomSmth_Hook(idPlayer* idPlayer_a1, char a2, __in
 	}
 	else {
 
+		//! if zoom key has bee pressed
 		if (ADS_Manager::isToggleFlag() && idPlayer_a1) {
 			ADS_Manager::Toggle(idPlayer_a1->playerVolatile.hudInfo.inScope);     
 		}
-		
-		
-
-
 	}
 	return p_idPlayerHandleZoomSmth(idPlayer_a1, a2, a3);
-
 
 }
 
@@ -963,9 +1029,53 @@ char __fastcall levelLoadCompleted_Hook() {
 
 	weaponsManager::updateDeclWeapons();
 
-
 	return p_levelLoadCompleted();
 }
+
+
+
+////! void __fastcall PlayAnimByIndex_Smth(idAnimSysNode_PlayAnimByIndex* idAnimSysNode_PlayAnimByIndex_a1, __int64 a2, __int64 a3, _QWORD* a4)
+//typedef void(__fastcall* PlayAnimByIndex_t)(void* idAnimSysNode_PlayAnimByIndex_a1, __int64 a2, __int64 a3, _QWORD* a4);
+//PlayAnimByIndex_t p_PlayAnimByIndex_t = nullptr;
+//PlayAnimByIndex_t p_PlayAnimByIndex_t_Target = nullptr;
+//
+//void __fastcall PlayAnimByIndex_t_Hook(void* idAnimSysNode_PlayAnimByIndex_a1, __int64 a2, __int64 a3, _QWORD* a4) {
+//	
+//
+//
+//
+//	p_PlayAnimByIndex_t(idAnimSysNode_PlayAnimByIndex_a1, a2, a3, a4);
+//}
+
+
+
+
+//? useless to analyse cam sprint animation:
+//typedef char(__fastcall* playerCameraSmth_t)(idPlayer* idplayer_a1, void*** a2, char a3);
+//playerCameraSmth_t p_playerCameraSmth_t = nullptr;
+//playerCameraSmth_t p_playerCameraSmth_t_Target = nullptr;
+//
+//char __fastcall playerCameraSmth_Hook(idPlayer* idplayer_a1, void*** a2, char a3) {
+//	
+//	static char lastA3 = -1;
+//	static void*** lasta2 = nullptr;
+//
+//	if (a3 != lastA3) {
+//		logInfo("playerCameraSmth_Hook: a3 has changed to: %d", a3);
+//		lastA3 = a3;
+//	}
+//
+//	if (a2 != lasta2) {
+//		logInfo("playerCameraSmth_Hook: a2 has changed to: %p", a2);
+//		lasta2 = a2;
+//	}
+//
+//	return p_playerCameraSmth_t(idplayer_a1, a2, a3);
+//}
+
+
+
+
 
 
 //? this works but won't be using it atm check the alternative
@@ -1003,12 +1113,12 @@ LRESULT CALLBACK HookedWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	if (MenuStateManager::isNotMenu() && !idConsoleLocalManager::isConsoleOpened() && cachedCvarsManager::isWindowFocused()) {
 		if (uMsg == WM_KEYDOWN) {
 			if (wParam == ModSettingsManager::getNormalSpeedKeyCode()) {
-				logInfo("HookedWndProc: user pressing normal speed key");
-				timescaleManager::setDefaultSpeed();
+				logInfo("HookedWndProc: user pressing reset game speed key");
+				timescaleManager::resetSpeed();
 			}
 			else if (wParam == ModSettingsManager::getFastForwardKeyCode()) {
-				logInfo("HookedWndProc: user pressing fast forward speed key");
-				timescaleManager::setMaxSpeed();
+				logInfo("HookedWndProc: user pressing fast forward game speed key");
+				timescaleManager::increaseSpeed();
 			}
 			else if (wParam == ModSettingsManager::getFlashLightKeyCode()) {
 				if (idLightManager::shouldFlashLightBeOff()) {

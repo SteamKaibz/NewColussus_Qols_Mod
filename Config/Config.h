@@ -65,7 +65,7 @@ public:
 	//xUpdate didn't work, user still has same issue which is not surprising. old: this should ever be true when compiling a special version for Intel gpu user who can not, apparently get json file generated or the mod working.
 	//static const inline bool IsForceNoModUi = false;
 
-	static const inline float MOD_VERSION_F = 2.7f;
+	static const inline float MOD_VERSION_F = 2.8f;
 
 	static const inline std::string MOD_FOLDER_NAME = "KaibzMod";
 

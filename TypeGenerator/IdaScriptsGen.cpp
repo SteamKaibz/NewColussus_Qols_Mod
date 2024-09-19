@@ -299,29 +299,226 @@ std::string IdaScriptsGen::getGeneratedIdcPythonScriptStr() {
 
 	return result;
 
-
-	//FILE* resfile = nullptr;
-	//errno_t err = fopen_s(&resfile, "DoomEternalTypes.py", "wb");
-
-	//if (err == 0 && resfile != nullptr) {
-	//    fwrite(result.c_str(), 1, result.length(), resfile);
-	//    //fputs(result.c_str(), resfile);
-	//    fclose(resfile);
-	//}
-	//else {
-	//    // Handle error, e.g., log or display a message
-	//    std::cerr << "Error opening file: DoomEternalTypes.py" << std::endl;
-	//}
+}
 
 
 
-	//FILE* resfile = nullptr;
+std::vector<addrName> IdaScriptsGen::getAddrNamesForCvar(idCVar* cvarPtr) {
+	std::vector<addrName> resultVec;
 
-	//fopen_s(&resfile, "DoomEternalTypes.py", "wb");
+	if (!cvarPtr) {
+		logErr("getAddrNamesForCvar: cvarPtr is nullptr !");
+		return resultVec;
+	}
 
-	//fwrite(result.c_str(), 1, result.length(), resfile);
-	////fputs(result.c_str(), resfile);
-	//fclose(resfile);
+	// Helper lambda to simplify adding entries to resultVec
+	auto addAddrName = [&](const std::string& suffix, uint64_t address) {
+		addrName entry;
+		if (address) {
+			//logInfo("addAddrName: dbg: name: %s address: %p ", suffix.c_str(), (void*)address);
+			entry.name = "cvar_" + std::string(cvarPtr->name) + suffix;
+			entry.rva_address = address - MemHelper::getModuleBaseAddr();
+			resultVec.push_back(entry);
+		}		
+	};
 
+	// Add various address names with corresponding suffixes
+	addAddrName("", (uint64_t)cvarPtr);
+	addAddrName("_valStrings", (uint64_t)&cvarPtr->valueStrings);
+	addAddrName("_int", (uint64_t)&cvarPtr->valueInteger);
+	addAddrName("_float", (uint64_t)&cvarPtr->valueFloat);
+	addAddrName("_valMax", (uint64_t)&cvarPtr->valueMax);
+	addAddrName("_valMin", (uint64_t)&cvarPtr->valueMin);
+	addAddrName("_valSecs", (uint64_t)&cvarPtr->valueSeconds);
+	addAddrName("_valMillis", (uint64_t)&cvarPtr->valueMilliseconds);
+	addAddrName("_valMicros", (uint64_t)&cvarPtr->valueMicroseconds);
+	addAddrName("_flags", (uint64_t)&cvarPtr->flags);
+	//? don't need this there is litterally 2 cvars which have onchange and they're irrelevant to us.
+	//addAddrName("_onChange", (uint64_t)cvarPtr->onChange);
+
+	return resultVec;
+}
+
+
+
+
+std::vector<addrName> IdaScriptsGen::getCvarsAddrNamesVec() {
+
+	std::vector<addrName> allAddrNamesVec;
+
+	size_t cvarsCounter = 0;
+
+	idList* cvarIdList = idCvarManager::getCVarlist();
+	if (!cvarIdList) {
+		logErr("getCvarsAddrNamesVec: cvarIdList is null");
+		return allAddrNamesVec;
+	}
+
+	logInfo("getCvarsAddrNamesVec: dbg: cvarIdList->num: %d", cvarIdList->num);
+
+	for (size_t i = 0; i < cvarIdList->num; i++) {
+		idCVar* cvarPtr = (idCVar*)cvarIdList->list[i];
+		if (!cvarPtr) continue;
+
+		// Get the address names for the current cvar
+		std::vector<addrName> cvarAddrNamesVec = IdaScriptsGen::getAddrNamesForCvar(cvarPtr);
+
+		// Add all the elements of cvarAddrNamesVec to allAddrNamesVec
+		allAddrNamesVec.insert(allAddrNamesVec.end(), cvarAddrNamesVec.begin(), cvarAddrNamesVec.end());
+	}
+
+	return allAddrNamesVec;
+}
+
+
+
+addrName IdaScriptsGen::getAddrNameForCmd(commandDef_s* cmdDef) {
+
+	addrName entry;
+	entry.name = "cmd_" + std::string(cmdDef->name);
+	entry.rva_address = ((uint64_t)cmdDef->function) - MemHelper::getModuleBaseAddr();
+	return entry;
+}
+
+
+std::vector<addrName> IdaScriptsGen::getCmdsAddrNamesVec() {
+
+	size_t cmdCounter = 0;
+	std::vector<addrName> allAddrNamesVec;;
+
+
+	idList* cmdIdList = idCmdManager::getCmdlist();
+	if (!cmdIdList) {
+		logErr("getCmdsAddrNamesVec: cmdIdList is null");
+		return allAddrNamesVec;
+	}
+
+	//logInfo("getCmdsAddrNamesVec: dbg: cmdIdList->num: %d", cmdIdList->num);
+
+
+	for (size_t i = 0; i < cmdIdList->num; i++)
+	{
+		commandDef_s* cmdDef = (commandDef_s *) cmdIdList->list[i];
+		if (!cmdDef) continue;
+
+		allAddrNamesVec.push_back(getAddrNameForCmd(cmdDef));
+
+		//logInfo("entry: %s f: %p", entry.name.c_str(), (void*)entry.rva_address);
+	}
+
+	return allAddrNamesVec;
+
+}
+
+
+
+addrName IdaScriptsGen::getAddrNameForEvent(idEventDef* eventDefPtr) {
+
+	addrName data = addrName(std::string(), 0);
+
+	if (!eventDefPtr || !eventDefPtr->name) {
+		logErr("getAddrName: !eventDefPtr || !eventDefPtr->name");
+		return data;
+	}
+
+	data.name = "eventDef_";
+	data.name += eventDefPtr->name;
+
+	data.rva_address = (uint64_t)eventDefPtr - MemHelper::getModuleBaseAddr();
+
+	return data;
+}
+
+
+
+
+std::vector<addrName> IdaScriptsGen::getEventsAddrNamesVec() {
+
+	std::vector<idEventDef*> eventDefsPtrs = idEventManager::getEventsVec();
+	std::vector<addrName> resultVec;
+
+	for (size_t i = 0; i < eventDefsPtrs.size(); i++)
+	{
+		resultVec.push_back(getAddrNameForEvent(eventDefsPtrs[i]));
+	}
+
+	return resultVec;
+
+}
+
+
+
+
+std::vector<addrName> IdaScriptsGen::getAllAddrNamesVec()
+{
+	std::vector<addrName> cvarDataVec = getCvarsAddrNamesVec();
+	std::vector<addrName> cmdDataVec = getCmdsAddrNamesVec();
+	std::vector<addrName> eventsDataVec = getEventsAddrNamesVec();
+
+	// Create a combined vector to store all elements
+	std::vector<addrName> combinedDataVec;
+
+	// Reserve space to avoid multiple reallocations (optional, but improves performance)
+	combinedDataVec.reserve(cvarDataVec.size() + cmdDataVec.size() + eventsDataVec.size());
+
+	// Insert elements from the first vector
+	combinedDataVec.insert(combinedDataVec.end(), cvarDataVec.begin(), cvarDataVec.end());
+
+	// Insert elements from the second vector
+	combinedDataVec.insert(combinedDataVec.end(), cmdDataVec.begin(), cmdDataVec.end());
+
+	// Insert elements from the third vector
+	combinedDataVec.insert(combinedDataVec.end(), eventsDataVec.begin(), eventsDataVec.end());
+
+	return combinedDataVec;
+
+}
+
+
+
+std::string IdaScriptsGen::get_address_name_list_Line_AsStr(addrName data) {
+
+	std::string resultStr;
+
+	if (data.name.empty() || data.rva_address == 0) {
+		return std::string();
+	}
+
+	std::string filteredNameStr = K_Utils::removeSpaces(data.name);
+
+	return "(" + K_Utils::intToHexString(data.rva_address) + ", \"" + filteredNameStr + "\"),\n";
+	
+}
+
+
+void IdaScriptsGen::generateRenameVarsPythongScript()
+{
+	std::vector<addrName> combinedDataVec = getAllAddrNamesVec();
+
+	std::string resultAsStr = "import idaapi\n\n";
+	resultAsStr += "address_name_list = [\n";
+	//std::string fourSpaces = "    ";
+
+	logInfo("generateRenameVarsPythongScript: debug: loggin addrName vec: ");
+
+	for (addrName data : combinedDataVec)
+	{
+		resultAsStr += get_address_name_list_Line_AsStr(data);
+		//logInfo("name: %s addr: %p", data.name.c_str(), (void*)data.rva_address);
+	}
+	resultAsStr += "]\n\n";
+	resultAsStr += "def rename_addresses(address_name_list):\n";
+	resultAsStr += "    for address, name in address_name_list:\n";
+	resultAsStr += "        result = idaapi.set_name(address, name, idaapi.SN_CHECK)\n";
+	resultAsStr += "        if result:\n";
+	resultAsStr += "            print(f\"Renamed address{ hex(address) } to{ name }\")\n";
+	resultAsStr += "        else:\n";
+	resultAsStr += "            print(f\"Failed to rename address{ hex(address) }\")\n\n";
+	resultAsStr += "# Call the function to rename addresses\n";
+	resultAsStr += "rename_addresses(address_name_list)\n";
+
+	std::string fileName = "IdaScript_Wolf2_Rename_Vars.py";
+
+	K_Utils::saveStrToFile(fileName, resultAsStr);
 
 }

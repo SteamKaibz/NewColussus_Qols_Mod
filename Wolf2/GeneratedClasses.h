@@ -664,6 +664,14 @@ struct idHudInteractionInfo {
 };
 
 
+//struct alignas(8) weaponAmmoInfo_t {
+//	//Offset 0x0,	 size 192
+//	char sldkf[192];// weaponAmmoInfo_t::ammoInfo_t[2] ammoInfo;
+//	//Offset 0xC0,	 size 4
+//	int flags;
+//}; //k: size 0xC4
+
+
 struct idHudInfo {
 	//Offset 0x0,	 size 1448
 	char pad_0[1448];	//idHudInfo::playerInfoIndicator_t playerInfoIndicator;
@@ -865,6 +873,31 @@ public:
 
 
 
+class idActor_idActorVolatile {
+public:
+	char pad_0[1424]; // offset: 0h (0d) size: 1424
+	char equipped[480]; // offset: 590h(1424d)  size : 480  idManagedClassPtr < idInventoryItem >[15] equipped;  
+	char pad_End[10464]; // offset: 770h (1904d) size: 10464
+}; // size: 12368
+
+
+// idActor : idAnimatedEntity : idEntity : idEventReceiver : idManagedClass : idClass
+class idActor {
+public:
+	char pad_0[5224]; // offset: 0h (0d) size: 5224
+	idActor_idActorVolatile actorVolatile; // offset: 1468h (5224d)  size: 12368
+}; // size: 17592
+
+
+class idEnvironmentAnalyzer {
+public:
+	char pad_0[4884]; // offset: 0h (0d) size: 4884
+	unsigned char forceLeanMode; // offset: 1314h (4884d)  size: 1
+	char pad_End[51]; // offset: 1315h (4885d) size: 51
+}; // size: 4936
+
+
+
 
 class idPlayer_idPlayerConstant {
 public:
@@ -886,26 +919,6 @@ public:
 
 
 
-//class idPlayer_idPlayerVolatile {
-//public:
-//	char pad_0[30]; // offset: 0h (0d) size: 30
-//	//? using our system to set the headlight the will be false even if we active the light :(
-//	bool headlightIsActive; // offset: 1Eh (30d)  size: 1
-//	char pad_31[2245]; // offset: 1Fh (31d) size: 2245
-//	movementMode_t currentMovementMode; // offset: 8E4h (2276d)  size: 4
-//	char pad_2280[8112]; // offset: 8E8h (2280d) size: 8112
-//	// idTypesafeTime < long long , gameTimeUnique_t , 999960 >
-//	long long showMarkerHintFadeOutTime; // offset: 2898h (10392d)  size: 8
-//	char pad_10400[776]; // offset: 28A0h (10400d) size: 776
-//	// idTypesafeTime < int , millisecondUnique_t , 1000 >
-//	int playerUseTime; // offset: 2BA8h (11176d)  size: 4
-//	idPlayer_playerUseState_t playerUseState; // offset: 2BACh (11180d)  size: 4
-//	char pad_11184[19304]; // offset: 2BB0h (11184d) size: 19304
-//	idHudInfo hudInfo; // offset: 7718h (30488d)  size: 4296
-//	localView_t localView; // offset: 87E0h (34784d)  size: 4600
-//	char pad_End[72392]; // offset: 99D8h (39384d) size: 72392
-//}; // size: 111776
-
 
 
 class idPlayer_idPlayerVolatile {
@@ -926,7 +939,9 @@ public:
 	char pad_11184[19304]; // offset: 2BB0h (11184d) size: 19304
 	idHudInfo hudInfo; // offset: 7718h (30488d)  size: 4296
 	localView_t localView; // offset: 87E0h (34784d)  size: 4600
-	char pad_End[72392]; // offset: 99D8h (39384d) size: 72392
+	char pad_39384[5968]; // offset: 99D8h (39384d) size: 5968
+	idEnvironmentAnalyzer environmentAnalyzer; // offset: B128h (45352d)  size: 4936
+	char pad_End[61488]; // offset: C470h (50288d) size: 61488
 }; // size: 111776
 
 
@@ -1022,3 +1037,107 @@ public:
 
 
 //?  read Types Generation section to understand how all this work
+
+
+
+//? this makes no sens to me: replacing data by int
+//struct idStatBase_statValue_t {
+//	//Offset 0x0,	 size 4
+//	int i;
+//	//Offset 0x0,	 size 4
+//	float f;
+//};
+
+
+class idStatBase {
+public:
+	//idDeclMetric* decl; // offset: 0h (0d)  size: 8
+	void* decl;
+	//idStatBase_statValue_t sessionValue; // offset: 8h (8d)  size: 4
+	int sessionValue;
+	//idStatBase_statValue_t aggregatedValue; // offset: Ch (12d)  size: 4
+	int aggregatedValue;
+}; // size: 16
+
+
+// idStat : idStatBase
+class idStat : public idStatBase {
+public:
+	//char pad_0[16]; // offset: 0h (0d) size: 16
+	int postSerializedSessionValueInt; // offset: 10h (16d)  size: 4
+	char pad_End[4]; // offset: 14h (20d) size: 4
+}; // size: 24
+
+
+
+class idLevelStats {
+public:
+	int startTime; // offset: 0h (0d)  size: 4
+	int endTime; // offset: 4h (4d)  size: 4
+	int damageTaken; // offset: 8h (8d)  size: 4
+	int itemsTaken; // offset: Ch (12d)  size: 4
+	//idStaticList < weaponStats_t, 20, false, TAG_IDLIST > weaponStats; // offset: 10h (16d)  size: 1632
+	char weaponStats[1632];
+}; // size: 1648
+
+
+//// idPlayerMetrics : idEventReceiver : idManagedClass : idClass
+//class idPlayerMetrics {
+//public:
+//	char pad_0[40]; // offset: 0h (0d) size: 40
+//	//idStaticList < idStat, 420, false, TAG_IDLIST > stats; // offset: 28h (40d)  size: 10112
+//	char stats[10112]; 
+//	char pad_10152[496]; // offset: 27A8h (10152d) size: 496
+//	int killsThisLife; // offset: 2998h (10648d)  size: 4
+//	char pad_10652[4]; // offset: 299Ch (10652d) size: 4
+//	float kdr; // offset: 29A0h (10656d)  size: 4
+//	char pad_10660[4]; // offset: 29A4h (10660d) size: 4
+//	bool inGame; // offset: 29A8h (10664d)  size: 1
+//	char pad_10665[135]; // offset: 29A9h (10665d) size: 135
+//	// idList < weaponQueueEntry_t , TAG_IDLIST , false >
+//	idList weaponQueue; // offset: 2A30h (10800d)  size: 32
+//	char pad_10832[112]; // offset: 2A50h (10832d) size: 112
+//	idLevelStats levelStats; // offset: 2AC0h (10944d)  size: 1648
+//	char pad_End[16]; // offset: 3130h (12592d) size: 16
+//}; // size: 12608
+
+
+
+//// idPlayerMetrics : idEventReceiver : idManagedClass : idClass
+class idPlayerMetrics {
+public:
+	char pad_0[40]; // offset: 0h (0d) size: 40
+	char stats[10112];  //idStaticList < idStat, 420, false, TAG_IDLIST > stats; // offset: 28h (40d)  size: 10112
+	char pad_10152[496]; // offset: 27A8h (10152d) size: 496
+	int killsThisLife; // offset: 2998h (10648d)  size: 4
+	char pad_10652[4]; // offset: 299Ch (10652d) size: 4
+	float kdr; // offset: 29A0h (10656d)  size: 4
+	char pad_10660[4]; // offset: 29A4h (10660d) size: 4
+	bool inGame; // offset: 29A8h (10664d)  size: 1
+	char pad_10665[135]; // offset: 29A9h (10665d) size: 135
+	// idList < weaponQueueEntry_t , TAG_IDLIST , false >
+	idList weaponQueue; // offset: 2A30h (10800d)  size: 32
+	char pad_10832[112]; // offset: 2A50h (10832d) size: 112
+	idLevelStats levelStats; // offset: 2AC0h (10944d)  size: 1648
+	char pad_End[16]; // offset: 3130h (12592d) size: 16
+}; // size: 12608
+
+
+// idMetrics : idEventReceiver : idManagedClass : idClass
+class idMetrics {
+public:
+	char pad_0[40]; // offset: 0h (0d) size: 40
+	idPlayerMetrics players[12]; // offset: 28h (40d)  size: 151296
+	bool gameEnded; // offset: 24F28h (151336d)  size: 1
+	char pad_End[7]; // offset: 24F29h (151337d) size: 7
+}; // size: 151344
+
+
+// idGameLocal : idGame
+class idGameLocal {
+public:
+	char pad_0[981296]; // offset: 0h (0d) size: 981296
+	idMetrics* gameMetrics; // offset: EF930h (981296d)  size: 8
+	char pad_End[475496]; // offset: EF938h (981304d) size: 475496
+}; // size: 1456800
+

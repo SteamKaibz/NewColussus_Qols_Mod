@@ -74,7 +74,10 @@ private:
 	static idInternalCVar__Set m_setCvarFp;
 
 
-	//! cached cvars for performance
+	//static inline const float swf_safeFrameMax = 0.93f;
+	static inline const float timeScaleMax = 50.0f; //! default max is 10 so we unlock it for faster game speed.
+
+	
 
 
 public:
@@ -84,6 +87,10 @@ public:
 	static bool acquireFindInternalFuncPtr(__int64 funcAddr);
 	static bool acquireSetInternalFuncAddr(__int64 funcAddr);
 
+	static __int64 getCVarSystemLocal();
+
+	static idList* getCVarlist();
+
 	static idCVar* getCvarPtr(std::string cvarStr);
 
 	static int getCvarInt(std::string cvarStr);
@@ -92,14 +99,19 @@ public:
 
 	static std::string getCvarString(std::string cvarStr);
 
-	static bool setCvar(std::string cvarStr, std::string val);
+	//? not using this anymore as using a cmd is safer. i suppose the cmd actually triggers callbacks, sets the correct flags and such, which setCvar does not do.
+	//static bool setCvar(std::string cvarStr, std::string val);
 
-	static bool setCvarFast(idCVar* cvar, const char* valStr);
+	//static bool setCvarFast(idCVar* cvar, const char* valStr);
 
-	static bool setModInitCvars();
+	//static bool setModInitCvars();
 
 	//! ensuring the mod works as it should. triggers when mod loads and when user exits the console.
-	static bool setCriticalCvars();
+	//static bool setCriticalCvars();
+
+	
+
+	static void init();
 
 	static void setValueMaxFloat(const char* cvarName, float maxValue);
 

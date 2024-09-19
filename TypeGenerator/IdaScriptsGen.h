@@ -14,6 +14,11 @@
 
 #include "../Wolf2/TypeInfoManager.h"
 #include "../K_Utils/K_Utils.h"
+#include "../Wolf2/structs_K.h"
+#include "../Wolf2/idCvarManager.h"
+#include "../Wolf2/idCmdManager.h"
+#include "../Wolf2/idEventManager.h"
+
 
 
 
@@ -68,5 +73,29 @@ public:
 	std::string normalize_type_name(std::string_view input);
 
 	std::string getGeneratedIdcPythonScriptStr();
+
+	//addrName getAddrName(idCVar* cvarPtr);
+
+	std::vector<addrName> getAddrNamesForCvar(idCVar* cvarPtr);
+
+	std::vector<addrName> getCvarsAddrNamesVec();
+
+	addrName getAddrNameForCmd(commandDef_s* cmdDef);
+
+	std::vector<addrName> getCmdsAddrNamesVec();
+
+	addrName getAddrNameForEvent(idEventDef* eventDefPtr);
+
+	std::vector<addrName> getEventsAddrNamesVec();
+
+	std::vector<addrName> getAllAddrNamesVec();
+
+	std::string get_address_name_list_Line_AsStr(addrName data);
+
+	void generateRenameVarsPythongScript();
+
+	
+
+
 };
 

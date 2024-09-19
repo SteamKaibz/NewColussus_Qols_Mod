@@ -86,6 +86,7 @@ void ModSettings::initializeMembers() {
     
     isAdsToggle = false;
     zoomKeyVkCode = VK_RBUTTON;
+    isSwapBindsWhenDualWielding = false;
 
 
     isUseCustomHud = false;

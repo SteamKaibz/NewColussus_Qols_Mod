@@ -29,14 +29,19 @@ public:
 
 	static bool isHudHiddenAlt();
 
-	static leanMode_t getLeanMode();
+	static std::string debug_GetDualAmmoInfoStr();
+
+	//static bool isDualWielding();
+
+	static void debugLogWeaponInfo();
+
+	//static leanMode_t getLeanMode();
 
 	//static void acquireidHudInfoPtr(idHudInfo* ptr);
 
 	static void logWarningTriggerVals();
 
 
-	static std::string inGuiGetDualWieldInfo();
 
 	static std::string imGuiDebugGetidDeclWeaponPtrStatus();
 

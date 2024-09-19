@@ -69,7 +69,7 @@
 	 }
  }
 
-
+//! cam anim is actually a big deal. Imo this is the reason why Machine game removed the cvar from the base game. If you change it to a low value (meaning no headbob) it will get player stuck in at least one custscene, it will prevent weapon recoil. Those checks prevent those to happen and still let player use close to no headbob is they want.
 void cameraManager::updateAnimCamAmount(idPlayer* idPlayerPtr)
 {
 	static bool isPostFiring = false;
@@ -83,30 +83,51 @@ void cameraManager::updateAnimCamAmount(idPlayer* idPlayerPtr)
 		if (preMoveEvent == EVENT_MOVEMENTDIRECTION_IDLE) {
 			cachedCvarsManager::setAnimCamAmountProgressive(camAnimDefaultValF);
 			//cachedCvarsManager::setAnimCamAmount(camAnimDefaultValF, AnimCamChangeReasonNotMoving);
+
+			Dbg_updateAnimCamAmountCondRef = 1;
 		}
 
 		//! this should prevent issue with camera twiching up when player is on coveyerbelt
 		else if (movMode == movementMode_t::MOVEMENT_MODE_GROUNDCOMBAT) {
 			cachedCvarsManager::setAnimCamAmountProgressive(camAnimDefaultValF);
 			//cachedCvarsManager::setAnimCamAmount(camAnimDefaultValF, AnimCamChangeReasonInWheelChair);
+			Dbg_updateAnimCamAmountCondRef = 2;
 		}
 
 		//! this should mean player is in an ingame cutscene and has to be reset to prevent player getting stuck forever. Could be the same as the condition below (isHudHidden) but because i don't have time to debut/test this atm i'm gonna leave it like this just to be sure.
 		else if (movMode == movementMode_t::MOVEMENT_MODE_MIDNIGHT_LIMITVIEW_NARROW) {
 			cachedCvarsManager::setAnimCamAmountProgressive(camAnimDefaultValF);
+			Dbg_updateAnimCamAmountCondRef = 3;
 			//cachedCvarsManager::setAnimCamAmount(camAnimDefaultValF, AnimCamChangeReasonMIDNIGHT_LIMITVIEW_NARROW);
 		}
 
 		else if (&idPlayerPtr->playerVolatile.hudInfo && hudManager::isHudHidden(&idPlayerPtr->playerVolatile.hudInfo)) { //! big chance we're in an in game cutscene, let's restore the default cam anim.
 			cachedCvarsManager::setAnimCamAmountProgressive(camAnimDefaultValF);
+			Dbg_updateAnimCamAmountCondRef = 5;
+
 			//cachedCvarsManager::setAnimCamAmount(camAnimDefaultValF, AnimCamChangeReasonInCutScene);
 		}
 
-		//else if(idPlayerPtr->playerVolatile.currentMovementMode == movementMode_t)
+		//! attempting to fix the annoying extra camera roll speed when leaning left/right after a sprint or a move when camAnim is set close to 0. Update it works !!!!
+		else if (idPlayerManager::isLeaning()) {
+
+			cachedCvarsManager::setAnimCamAmountProgressive(camAnimDefaultValF);
+			Dbg_updateAnimCamAmountCondRef = 6;
+		}
 
 
+		else {
+			cachedCvarsManager::setAnimCamAmountProgressive(ModSettingsManager::getHeadBobAmount());
+			//cachedCvarsManager::setAnimCamAmount(ModSettingsManager::getHeadBobAmount(), AnimCamChangeReasonHeadbobVal);
 
-		//todo we not only need to check the firing state BUT the player moving state as well, otherwise, when we transition from firing to not firing it's a bit jarring as the camera snaps and it is visible.
+			Dbg_updateAnimCamAmountCondRef = 7;
+
+		}
+
+		
+
+
+		//! this is not needed anymore: 
 		//else if (weaponStateManager::isCurrentWeaponFiring((char*)idPlayerPtr)) {
 		//	//! making sure recoil cam anim is at it should be whatever headbob setting is
 		//	cachedCvarsManager::setAnimCamAmount(camAnimDefaultValF, AnimCamChangeReasonWeaponFiring);
@@ -122,10 +143,10 @@ void cameraManager::updateAnimCamAmount(idPlayer* idPlayerPtr)
 		//	}
 		//}
 
-		else {
-			cachedCvarsManager::setAnimCamAmountProgressive(ModSettingsManager::getHeadBobAmount());
-			//cachedCvarsManager::setAnimCamAmount(ModSettingsManager::getHeadBobAmount(), AnimCamChangeReasonHeadbobVal);
-		}
+		
+	}
+	else {
+		Dbg_updateAnimCamAmountCondRef = 8;
 	}
 }
 
@@ -149,4 +170,9 @@ std::string cameraManager::animCamChangeReasonStr(AnimCamAmountChangeReson value
 	default:
 		return "Unknown";
 	}
+}
+
+std::string cameraManager::getAnimCamAmountDbgStrForImgui() {
+
+	return "Dbg_updateAnimCamAmountCondRef: " + std::to_string(Dbg_updateAnimCamAmountCondRef);
 }

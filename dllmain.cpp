@@ -130,9 +130,10 @@ void modInit() {
 
 	logInfo("modInit: waiting for MenuStateManager to initialize....");
 
-	idCvarManager::setModInitCvars();
 
-	idCvarManager::setCriticalCvars();
+	idCmdManager::init();
+
+	idCvarManager::init();
 
 	languageManager::LogGameLocalisation();
 
@@ -332,6 +333,23 @@ bool InitializeHooksV2() {
 	}
 
 
+	p_SendKeySmth_t_Target = reinterpret_cast<idUsercmdGenLocal_SendKeySmth_t>(MemHelper::getFuncAddr(0xAE6FE0));
+	if (MH_CreateHook(reinterpret_cast<void**>(p_SendKeySmth_t_Target), &SendKeySmth_t_Hook, reinterpret_cast<void**>(&p_SendKeySmth_t)) != MH_OK) {
+		logErr("Failed to create SendKeySmth_t hook.");
+		return false;
+	}
+
+
+	
+
+
+	//p_playerCameraSmth_t_Target = reinterpret_cast<playerCameraSmth_t>(MemHelper::getFuncAddr(0xff4340));
+	//if (MH_CreateHook(reinterpret_cast<void**>(p_playerCameraSmth_t_Target), &playerCameraSmth_Hook, reinterpret_cast<void**>(&p_playerCameraSmth_t)) != MH_OK) {
+	//	logErr("Failed to create p_playerCameraSmth_t_Target hook.");
+	//	return false;
+	//}
+
+
 	//p_idPlayerWeaponStateSmth_Target = reinterpret_cast<idPlayerWeaponStateSmth_t>(MemHelper::getFuncAddr(0xFD31D0));
 	//if (MH_CreateHook(reinterpret_cast<void**>(p_idPlayerWeaponStateSmth_Target), &idPlayerWeaponStateSmth_Hook, reinterpret_cast<void**>(&p_idPlayerWeaponStateSmth)) != MH_OK) {
 	//	logErr("Failed to create idPlayerWeaponStateSmth_Target hook.");
@@ -403,7 +421,7 @@ DWORD WINAPI ModMain() {
 	Console::Enable();
 	
 	//? this about updating mod version if you update.
-	Config::setBuildType(buildType::nexusDebug);  //! dev, nexusDebug, nexusRelease   
+	Config::setBuildType(buildType::dev);  //! dev, nexusDebug, nexusRelease   
 
 
 	//! this could and sould be simplified....
@@ -515,7 +533,8 @@ DWORD WINAPI ModMain() {
 	uint64_t lastdebugUseSystemPrintMs = 0;
 	uint64_t lastIniFileWatcherCheckMs = 0;
 	uint64_t lastHighFpxFixCheckMs = 0;
-
+	uint64_t lastDwCheckMs = 0; //! dual wield
+	bool istryCacheGameFireKeysBindsFirstTime = true;;
 
 
 
@@ -549,7 +568,16 @@ DWORD WINAPI ModMain() {
 
 			ADS_Manager::checkZoomBtnState();
 
-		}		
+		}	
+
+		//! one way to make sure the 'swap keys for dw' mod features is initialized
+		if (istryCacheGameFireKeysBindsFirstTime) {
+
+			if (!idUsercmdGenLocalManager::isFireKeysBindsSet()) {
+				idUsercmdGenLocalManager::tryCacheGameFireKeysBinds();
+			}
+			istryCacheGameFireKeysBindsFirstTime = false;
+		}
 
 		//! 23/8/24 adding this to fix the player stuck on ledges at high framerate. we could potentially make this system trigger automatically but it will do for now.
 		if (K_Utils::EpochMillis() - lastHighFpxFixCheckMs > 50) {
@@ -558,6 +586,8 @@ DWORD WINAPI ModMain() {
 
 			lastHighFpxFixCheckMs = K_Utils::EpochMillis();
 		}
+
+
 		
 		
 
@@ -569,18 +599,25 @@ DWORD WINAPI ModMain() {
 				break;
 			}
 
-
 			if (GetAsyncKeyState(VK_NUMPAD1) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
 				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
 				logInfo("secret Debug: user just pressed  VK_NUMPAD1 : dumping class defs:");
 
 				TTS::addToQueue(sayGeneratingTypes);
 
+				//! leave those:
 				EnumsDefFileGenerator::DumpEnumDefs();
 				ClassDefFileGenerator::dumpClassDefs();
+
 				idEventManager::listAllEventsToFile();
+				idEventManager::generateEventNumsEnumFile();
+				idEventManager::generateEventNumsEnumFileFor_0xcb58c0();
+
+				/*IdaScriptsGen gen;
+				gen.dumpIdaIdc();*/
 
 			}
+
 
 			if (GetAsyncKeyState(VK_NUMPAD2) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
 				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
@@ -611,6 +648,9 @@ DWORD WINAPI ModMain() {
 				logInfo("animCamAmountCvar: %p", animCamAmountCvar);
 
 
+				idPlayerManager::Dbg_LogPreMoveAdd();
+
+				hudManager::debugLogWeaponInfo();
 
 			}
 
@@ -620,15 +660,30 @@ DWORD WINAPI ModMain() {
 				logInfo("DEBUG: user just pressed  VK_NUMPAD4");
 
 
+				Menu::bTEMPisShowStats = !Menu::bTEMPisShowStats;
+					
 
-				idResourceManager::debugLogResourceListForClsName("idDeclSwfJournalResource");
+				//idResourceManager::debugLogResourceListForClsName("idDeclSwfJournalResource");
 
 			}
 
 			if (GetAsyncKeyState(VK_NUMPAD5) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
 				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
 
+				idUsercmdGenLocalManager::getKeyboardBind_K_ForAction(UB_ATTACK1);
+				idUsercmdGenLocalManager::getKeyboardBind_K_ForAction(UB_ZOOM);
 
+				std::string keyNameStr = idUsercmdGenLocalManager::getKeyNameStrForKeyNum(K_MINUS);
+				logInfo("keyNameStr: %s", keyNameStr.c_str());
+
+
+				__int64 BtnInfoAddr = idUsercmdGenLocalManager::getBtnInfoFor(K_MOUSE2);
+				logInfo("BtnInfoAddr: %p", (void*)BtnInfoAddr);
+
+				//! keep findClassInfo:
+				//classTypeInfo_t* clsInfoPtr = TypeInfoManager::findClassInfo("idMenuScreen_Shell_Controls");
+				//logInfo("clsInfoPtr: %p", clsInfoPtr);		
+				
 
 			}
 

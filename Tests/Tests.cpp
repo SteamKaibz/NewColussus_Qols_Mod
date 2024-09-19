@@ -70,6 +70,7 @@ void Tests::PrintIdPlayerInfo() {
     logInfo("idPlayer::idPlayerVolatile: zoomedIn addr: %p", (idPlayerVolatile + 0xD8 + 0x68));
     logInfo("idPlayer::idPlayerVolatile: idEnvironmentAnalyzer addr: %p", (idPlayerVolatile + 0xB128));
     logInfo("idPlayer::idPlayerVolatile: idHavokPhysics_Player addr: %p", (idPlayerVolatile + 0x9C88));
+    logInfo("idPlayer::idPlayerVolatile: localView_t localView: %p", (idPlayerVolatile + 0x87E0));
    
 
 
@@ -107,6 +108,8 @@ void Tests::PrintIdPlayerInfo() {
     logInfo("&entityPtr->playerController->ucmdTracker1.usercmd.buttons: %p", &entityPtr->playerController->ucmdTracker1.usercmd.buttons);
     auto buttons = entityPtr->playerController->ucmdTracker1.usercmd.buttons;
 
+
+   
 
 
 }

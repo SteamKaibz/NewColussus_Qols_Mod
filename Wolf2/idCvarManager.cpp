@@ -51,6 +51,21 @@ bool idCvarManager::acquireSetInternalFuncAddr(__int64 funcAddr) {
 }
 
 
+__int64 idCvarManager::getCVarSystemLocal() {
+
+	return m_idCVarSystemLocal;
+}
+
+//! assuming it's an idList by checking in CE at m_idCVarSystemLocal + 8. i checked the count (3256).
+idList* idCvarManager::getCVarlist() {
+
+	if (!m_idCVarSystemLocal) {
+		return nullptr;
+	}
+
+	return (idList * )(m_idCVarSystemLocal + 0x8);
+}
+
 
 idCVar* idCvarManager::getCvarPtr(std::string cvarStr) {
 	//logInfo("debug getCvarPtr 1");
@@ -107,81 +122,89 @@ std::string idCvarManager::getCvarString(std::string cvarStr) {
 
 
 
-bool idCvarManager::setCvar(std::string cvarStr, std::string val) {
-	if (MemHelper::isBadReadPtr((void*)m_idCVarSystemLocal)) {
-		logErr("setCvar: m_idCVarSystemLocal is bad ptr: %p returning", (void*)m_idCVarSystemLocal);
-		return false;
-	}	
-	idCVar* cvarPtr = getCvarPtr(cvarStr);	
-	if (cvarPtr) {		
-		m_setCvarFp(cvarPtr, val.c_str(), 1);
-		return true;
-	}
-	else {
-		logErr("setCvar failed to find cvar: %s", cvarStr.c_str());
-		return false;
-	}	
-}
+//bool idCvarManager::setCvar(std::string cvarStr, std::string val) {
+//	if (MemHelper::isBadReadPtr((void*)m_idCVarSystemLocal)) {
+//		logErr("setCvar: m_idCVarSystemLocal is bad ptr: %p returning", (void*)m_idCVarSystemLocal);
+//		return false;
+//	}	
+//	idCVar* cvarPtr = getCvarPtr(cvarStr);	
+//	if (cvarPtr) {		
+//		m_setCvarFp(cvarPtr, val.c_str(), 1);
+//		return true;
+//	}
+//	else {
+//		logErr("setCvar failed to find cvar: %s", cvarStr.c_str());
+//		return false;
+//	}	
+//}
 
 
-bool idCvarManager::setCvarFast(idCVar* cvar, const char* valStr) {
-	if (cvar && m_setCvarFp) {
-		return m_setCvarFp(cvar, valStr, 1);
-	}
-	return false;
-}
+//bool idCvarManager::setCvarFast(idCVar* cvar, const char* valStr) {
+//	if (cvar && m_setCvarFp) {
+//		return m_setCvarFp(cvar, valStr, 1);
+//	}
+//	return false;
+//}
 
 //! cvars that need to be in a specific state when mod loads.
-bool idCvarManager::setModInitCvars() {
-	logInfo("enforcing mod load Cvars");
+//bool idCvarManager::setModInitCvars() {
+//	logInfo("enforcing mod load Cvars");
+//
+//	bool isError = false;
+//
+//	
+//	isError =  !setCvar("in_unlockMouseInMenus", "0") || isError;
+//	isError = !setCvar("view_showWorldMarkers", "1") || isError;
+//
+//	if (isError) {
+//		logErr("setModInitCvars: Error some setCvar calls failed (?!)");
+//	}
+//
+//	return !isError;
+//}
 
-	bool isError = false;
 
-	
-	isError =  !setCvar("in_unlockMouseInMenus", "0") || isError;
-	isError = !setCvar("view_showWorldMarkers", "1") || isError;
+//bool idCvarManager::setCriticalCvars() {
+//	logInfo("enforcing critical Cvars");
+//	bool isError = false;
+//	
+//
+//	/*if (Config::IsForceNoModUi) {
+//		isError = !setCvar("menu_showOptionForDevMenu", "0") || isError;
+//	}*/
+//	if(ModSettingsManager::getIsUseImgui()) {
+//		isError = !setCvar("menu_showOptionForDevMenu", "1") || isError;
+//	}
+//	else {
+//		isError = !setCvar("menu_showOptionForDevMenu", "0") || isError;
+//	}
+//	isError = !setCvar("g_showHud", "1") || isError;
+//	isError = !setCvar("com_skipGameRenderView", "0") || isError;
+//	isError = !setCvar("r_skipGuis", "0") || isError;
+//	isError = !setCvar("swf_skipRender", "0") || isError;
+//	isError = !setCvar("swf_skipRenderText", "0") || isError;
+//
+//	//isError = !setCvar("swf_safeFrame", "0.025") || isError;
+//	isError = !setCvar("r_vignette", "0") || isError; //! this is noticable only when in simulation levels but still useful.
+//	isError = !setCvar("view_showWorldMarkers", "1") || isError;  //! need to make sure it doesn't leave a ghost of itself in some situations.
+//
+//	idCvarManager::setValueMaxFloat("swf_safeFrame", swf_safeFrameMax); //! this will log.
+//
+//
+//	idCvarManager::setValueMaxFloat("timescale", timeScaleMax); //! so we can fast forward faster...
+//
+//	if (isError) {
+//		logErr("setCriticalCvars: Error some setCvar calls failed (?!)");
+//	}
+//
+//	return !isError;
+//}
 
-	if (isError) {
-		logErr("setModInitCvars: Error some setCvar calls failed (?!)");
-	}
 
-	return !isError;
+void idCvarManager::init()
+{
+	idCvarManager::setValueMaxFloat("timescale", timeScaleMax); //! so we can fast forward faster...
 }
-
-
-bool idCvarManager::setCriticalCvars() {
-	logInfo("enforcing critical Cvars");
-	bool isError = false;
-	
-
-	/*if (Config::IsForceNoModUi) {
-		isError = !setCvar("menu_showOptionForDevMenu", "0") || isError;
-	}*/
-	if(ModSettingsManager::getIsUseImgui()) {
-		isError = !setCvar("menu_showOptionForDevMenu", "1") || isError;
-	}
-	else {
-		isError = !setCvar("menu_showOptionForDevMenu", "0") || isError;
-	}
-	isError = !setCvar("g_showHud", "1") || isError;
-	isError = !setCvar("com_skipGameRenderView", "0") || isError;
-	isError = !setCvar("r_skipGuis", "0") || isError;
-	isError = !setCvar("swf_skipRender", "0") || isError;
-	isError = !setCvar("swf_skipRenderText", "0") || isError;
-
-	//isError = !setCvar("swf_safeFrame", "0.025") || isError;
-	isError = !setCvar("r_vignette", "0") || isError; //! this is noticable only when in simulation levels but still useful.
-	isError = !setCvar("view_showWorldMarkers", "1") || isError;  //! need to make sure it doesn't leave a ghost of itself in some situations.
-
-	idCvarManager::setValueMaxFloat("swf_safeFrame", 0.93f); //! this will log.
-
-	if (isError) {
-		logErr("setCriticalCvars: Error some setCvar calls failed (?!)");
-	}
-
-	return !isError;
-}
-
 
 //! set the max value the cvar can be set to
 void idCvarManager::setValueMaxFloat(const char* cvarName, float maxVal) {

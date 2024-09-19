@@ -68,6 +68,7 @@ void ADS_Manager::Toggle(bool isInScope) {
 void ADS_Manager::restoreZoomBtnReleaseCheck(){
 	
 	if (Patcher::patchIfNeeded("", m_zoomBtnReleaseCheckAddr, ZoomBtnReleaseCheckInstructionVec)) {
+		
 		m_zoomInstructionState = zoomCodeOriginal;
 	}
 }
@@ -75,7 +76,8 @@ void ADS_Manager::restoreZoomBtnReleaseCheck(){
 void ADS_Manager::preventZoomBtnReleaseCheck()
 {
 	if (Patcher::patchIfNeeded("", m_zoomBtnReleaseCheckAddr, PreventZoomBtnReleaseNewInstructionVec)) {
-	m_zoomInstructionState = zoomCodePatched;
+	
+		m_zoomInstructionState = zoomCodePatched;
 
 	}
 }

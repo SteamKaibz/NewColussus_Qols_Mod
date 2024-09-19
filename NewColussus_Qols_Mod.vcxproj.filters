@@ -122,6 +122,10 @@
     <ClInclude Include="Wolf2\languageManager.h" />
     <ClInclude Include="Wolf2\idAutomapManager.h" />
     <ClInclude Include="Wolf2\weaponStateManager.h" />
+    <ClInclude Include="Wolf2\statsManager.h" />
+    <ClInclude Include="ImGui\menu\liveStatsGui.h" />
+    <ClInclude Include="TypeGenerator\IdaScriptsGen.h" />
+    <ClInclude Include="Wolf2\structs_K.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -216,6 +220,9 @@
     <ClCompile Include="Wolf2\languageManager.cpp" />
     <ClCompile Include="Wolf2\idAutomapManager.cpp" />
     <ClCompile Include="Wolf2\weaponStateManager.cpp" />
+    <ClCompile Include="Wolf2\statsManager.cpp" />
+    <ClCompile Include="ImGui\menu\liveStatsGui.cpp" />
+    <ClCompile Include="TypeGenerator\IdaScriptsGen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="xinput1_3_wrapper.def" />

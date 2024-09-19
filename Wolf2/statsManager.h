@@ -2,6 +2,7 @@
 
 #include "idGameLocalManager.h"
 #include "TypeInfoManager.h"
+#include "GeneratedEnums.h"
 
 
 

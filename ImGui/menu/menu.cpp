@@ -54,9 +54,17 @@ namespace Menu {
             showModMenu();
             return;             
         }
+
+
+        //? TEMPORARY WILL NEED MORE CONDITIONS
+        if (bTEMPisShowStats) {
+            liveStatsGui::show();
+        }
+       
         
         if (idEngineLocalManager::isGameActive() && timescaleManager::isFastForwardTimeScale()) {
-            fastForwardGui::showFastForwardIcon();
+            //fastForwardGui::showFastForwardIcon();
+            fastForwardGui::show();
         }
 
         if (ModSettingsManager::isShowFlashLightIcon() && idEngineLocalManager::isGameActive() && idLightManager::isHeadLightOn()) {
@@ -203,6 +211,7 @@ namespace Menu {
             
                 modSettings.isAdsToggle = j.value("isAdsToggle", false);
                 modSettings.zoomKeyVkCode = j.value("zoomKeyVkCode", VK_RBUTTON);  
+                modSettings.isSwapBindsWhenDualWielding = j.value("isSwapBindsWhenDualWielding", false);
 
                 modSettings.highFrameMvtFixKeyVkCode = j.value("highFrameMvtFixKeyVkCode", 0);
 
@@ -342,6 +351,8 @@ namespace Menu {
 
         j["isAdsToggle"] = modSettings.isAdsToggle;
         j["zoomKeyVkCode"] = modSettings.zoomKeyVkCode;  
+        j["isSwapBindsWhenDualWielding"] = modSettings.isSwapBindsWhenDualWielding;
+
 
         j["highFrameMvtFixKeyVkCode"] = modSettings.highFrameMvtFixKeyVkCode;
 
@@ -1392,41 +1403,25 @@ namespace Menu {
                     isWaitingForHighFPSFixKeyPress = false;
                     Menu::lastKeyPressed = -1;
                 }
+                
                 ImGui::NewLine();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 ImGui::NewLine();  
                 ImGui::NewLine();    
+
                 ImGui::SliderFloat("Headbob amount", &Menu::modSettings.headBobAmount, 0.1f, 1.0f);
                 insertToolTipSameLine("How much the camera move/shakes when you walk or sprint. Higer val => more shakes (game default: 1)");
 
                 ImGui::NewLine();  
+
                 ImGui::SliderFloat("Camera Damage View Shake Max", &Menu::modSettings.viewKickMax, 0.5f, 2.0f);
                 insertToolTipSameLine("How much the camera can move/shakes when you take damage (game default: 2)");
             
-
-             
-
                
-
-               
-
+                ImGui::NewLine();
                 ImGui::NewLine();    
                 ImGui::NewLine();
+
+
                 float mouseSens = idCvarManager::getCvarFloat("m_sensitivity");
                
                 if (ImGui::Button("S-")) {
@@ -1446,11 +1441,28 @@ namespace Menu {
                 ImGui::SameLine();
                 ImGui::SliderFloat("Set Precise Mouse Sensitivity", &mouseSens, 0.0f, 10.0f);
                 insertToolTipSameLine("This gives you more precision to change sensitivity compared to game menu (game default: 3)");
-                idCvarManager::setCvar("m_sensitivity", std::to_string(mouseSens));
+                //todo check the var with fastCvar first here
+                if (cachedCvarsManager::getMouseSens() != mouseSens) {
+                    idCmdManager::executeCmd("m_sensitivity", std::to_string(mouseSens));
+                }
+                //idCvarManager::setCvar("m_sensitivity", std::to_string(mouseSens));
         
+
+                ImGui::NewLine();
+                ImGui::NewLine();
+                ImGui::NewLine();
+
+
+                ImGui::Checkbox("Swap Keybinds When Dual Wielding", &Menu::modSettings.isSwapBindsWhenDualWielding);
+                insertToolTipSameLine("Checked: For example, if you have bound zoom to right mouse button \nand fire to left mouse button, this feature will invert\n those binds when dual wielding so in that case, \nmouse right will fire right weapon and mouse left will fire left weapon \nUnchecked: Default game behaviour");
+                ImGui::SameLine();
+                ImGui::TextColored(orangeColor, " (Not Recommended for Controller Users !)");
+
 
                 ImGui::NewLine();    
                 ImGui::NewLine();  
+
+
                 if (Menu::modSettings.isAdsToggle) {
                     ImGui::PushStyleColor(ImGuiCol_Text, yellowColor);
                     ImGui::Text("DON T FORGET TO SET THE ZOOM KEY BELOW IF YOU ENABLE THIS");
@@ -1535,7 +1547,8 @@ namespace Menu {
                 float lensFlareRationF = idCvarManager::getCvarFloat("r_lensFlaresRatio");
                 ImGui::SliderFloat("Lens Flare Ratio", &lensFlareRationF, 0.0f, 1.0f);
                 insertToolTipSameLine("How much flare should ligth create (game default: 1)");
-                idCvarManager::setCvar("r_lensFlaresRatio", std::to_string(lensFlareRationF));                
+                idCmdManager::executeCmd("r_lensFlaresRatio", std::to_string(lensFlareRationF));
+                //idCvarManager::setCvar("r_lensFlaresRatio", std::to_string(lensFlareRationF));                
 
 
                 ImGui::NewLine();  
@@ -1595,7 +1608,8 @@ namespace Menu {
                 float consoleTransparencyF = idCvarManager::getCvarFloat("com_consoleTransparency");
                 ImGui::SliderFloat("Console Transparency", &consoleTransparencyF, 0.1f, 1.0f);
                 insertToolTipSameLine("Console Transparency...(default: 1)");
-                idCvarManager::setCvar("com_consoleTransparency", std::to_string(consoleTransparencyF));
+                idCmdManager::executeCmd("com_consoleTransparency", std::to_string(consoleTransparencyF));
+                //idCvarManager::setCvar("com_consoleTransparency", std::to_string(consoleTransparencyF));
 
 
                 if (Config::getBuildType() != buildType::nexusRelease) {

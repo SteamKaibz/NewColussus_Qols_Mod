@@ -16,7 +16,7 @@ private:
 	//! this is used to prevent keypress from triggering key press actions when user alt tabs
 	static idCVar* m_win_hasFocusCached;
 	static idCVar* m_swf_safeFrameCached;
-	static idCVar* m_swf_timescaleCached;
+	static idCVar* m_timescaleCached;
 	static idCVar* m_swf_skipRenderText;
 	static idCVar* m_pm_animCamAmount;
 	static idCVar* m_sensitivity; // 
@@ -58,7 +58,7 @@ public :
 
 	static void setSafeFrameToDefault();
 
-	static void setTimescale(float timeScaleF);
+	//static void setTimescale(float timeScaleF);
 
 	static float getTimescaleF();
 

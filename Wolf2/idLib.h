@@ -52,6 +52,17 @@ struct idStr {
 
 
 
+struct idManagedClassPtrBase {
+	//Offset 0x0 	Size 0x8 (8)
+	void* ptr; // idManagedClass* ptr;
+	//Offset 0x8 	Size 0x8 (8)
+	idManagedClassPtrBase* next;
+	//Offset 0x10 	Size 0x8 (8)
+	idManagedClassPtrBase* prev;
+	//Offset 0x18 	Size 0x4 (4)
+	int spawnId; // idSpawnId spawnId;
+}; // Size: 0x20 (Size Dec: 32)
+
 //struct idListVoid
 //{
 //	unsigned __int64* list;
@@ -70,15 +81,284 @@ struct idStrId {
 	unsigned int id;
 };
 
-struct idList
-{
-	unsigned __int64* list; // deref of this should be the first elem of the list
+//struct idList
+//{
+//	unsigned __int64* list; // deref of this should be the first elem of the list
+//	int num;
+//	int size;
+//	__int16 granularity;
+//	unsigned __int8 memTag;
+//	unsigned __int8 listStatic;
+//};
+
+
+//? 16/9/24 after the big crash, i thought this was the reason we got crashes but it seems fine.
+//! 15/9/24 updated this as we were using the old IdList from DE which is shorter, this one has a pad at the end
+//struct idListBase {
+struct idList {
+	//Offset 0x0 	Size 0x8 (8)
+	unsigned __int64* list;
+	//Offset 0x8 	Size 0x4 (4)
 	int num;
+	//Offset 0xC 	Size 0x4 (4)
 	int size;
-	__int16 granularity;
-	unsigned __int8 memTag;
-	unsigned __int8 listStatic;
+	//Offset 0x10 	Size 0x4 (4)
+	int granularity;
+	//Offset 0x14 	Size 0x2 (2)
+	short memTag;
+	//Offset 0x16 	Size 0x2 (2)
+	short listStatic;
+	//Offset 0x18 	Size 0x8 (8)
+	unsigned long long padd; // yes this is fomr the lib itself i didn't add that
+}; // Size: 0x20 (Size Dec: 32)
+
+
+
+struct commandDef_s {
+	//Offset 0x0 	Size 0x8 (8)
+	char* name;
+	//Offset 0x8 	Size 0x8 (8)
+	void* function;//void(const idCmdArgs& args)* function;
+	//Offset 0x10 	Size 0x8 (8)
+	void* argCompletion; // void(idAutoComplete& autoComplete)* argCompletion;
+	//Offset 0x18 	Size 0x8 (8)
+	char* description;
+	//Offset 0x20 	Size 0x4 (4)
+	int flags;
+}; // Size: 0x28 (Size Dec: 40)
+
+
+//types def from meathook: 
+#pragma pack(push, 1)
+struct enumValueInfo_t {
+	//offset 0 , size 8
+	char* name;
+	//offset 8 , size 4
+	long long value;
+
 };
+//struct enumTypeInfo_t {
+//	//offset 0 , size 8
+//	char* name;
+//	//offset 8 , size 4
+//	unsigned long long flags;
+//	int type;
+//	int valueIndexLength;
+//
+//	//offset 16 , size 8
+//	enumValueInfo_t* values;
+//	int* valueIndex;
+//};
+
+struct enumTypeInfo_t {
+	char* name;
+	int unknown_1;
+	int unknown_2;
+	int unknown_3;
+	int unknown_4;
+	enumValueInfo_t* values;
+};
+
+
+
+struct typedefInfo_t {
+	char* name;
+	char* type;
+	char* ops;
+	int size;
+	int padding;
+};
+struct classMetaDataInfo_t
+{
+	char* metaData;
+};
+#pragma pack(pop)
+
+
+
+#pragma pack(push, 1)
+//! from our idLib, with some tweaks
+struct classVariableInfo_t {
+	//Offset 0x0,	 size 8
+	char* type;
+	//Offset 0x8,	 size 8
+	char* ops;
+	//Offset 0x10,	 size 8
+	char* name;
+	//Offset 0x18,	 size 4
+	int offset;
+	//Offset 0x1C,	 size 4
+	int size;
+	//Offset 0x20,	 size 8
+	std::type_info* type_id;
+	//Offset 0x28,	 size 8
+	long long flags;
+	//Offset 0x30,	 size 8
+	char* comment;
+	//Offset 0x38,	 size 8
+	int (*get)(void* ptr);
+	//Offset 0x40,	 size 8
+	void (*set)(void* ptr, int value);
+	//Offset 0x48,	 size 8
+	void* (*reallocate)(void* ptr, const int oldNum, const int newNum, const int tag, const bool zeroBuffer);
+};
+
+#pragma pack(pop)
+
+struct idClass;
+struct idRenderModel;
+struct idDeclModelAsset;
+
+#pragma pack(push, 1)
+/*
+	we replace all classes metaData pointers with pointers to the one in here.
+	then we just recast to be able to search for a fields index. when you have the index you can just look it up in variables
+*/
+struct mh_classtypeextra_t {
+
+	classMetaDataInfo_t m_metadata;
+
+	//
+	unsigned m_num_fields;
+
+	unsigned m_offset2fields; //add to this to get base of field props
+};
+
+
+//! from out lib with little tweaks:
+struct classTypeInfo_t {
+	//Offset 0x0,	 size 8
+	char* name;
+	//Offset 0x8,	 size 8
+	char* superType;
+	//Offset 0x10,	 size 4
+	int size;
+	//Offset 0x14,	 size 4
+	int pad_allignment; // this is just something we added to make sure it's alligned.
+	//Offset 0x18,	 size 8
+	std::type_info* type_id;
+	//Offset 0x20,	 size 8
+	classVariableInfo_t* templateParms;
+	//Offset 0x28,	 size 8
+	classVariableInfo_t* variables;
+	//Offset 0x30,	 size 8
+	idClass* (*createInstance)();
+	//Offset 0x38,	 size 8
+	idRenderModel* (*createModel)(const idDeclModelAsset* modelAsset, const unsigned int createFlags);
+	//Offset 0x40,	 size 8
+	classMetaDataInfo_t* metaData;
+};
+
+//§ this is size 0x50...
+//struct classTypeInfo_t
+//{
+//	char* name;
+//	char* superType;
+//	int size;
+//
+//	//char pad20[4];
+//	//this is padding in the engine originally, but we co-opt it to store the byte delta from the start of this class to
+//	//the start of its super class, allowing us to traverse the inheritance chain without having to go through findclassinfo's hashing and searching
+//	//this could be made to be fewer bits if i need other stuff in here in the future
+//	//also, it could be shifted to the right by 3 to make room for more bits since it should always be 8 byte aligned
+//	int m_mh_added_delta2super;
+//	classVariableInfo_t* templateParms;
+//	char pad_0[8]; //! added pad to make variables to offset variables location in the struct
+//	classVariableInfo_t* variables; //! this is now at offset 0x28 but in Eternal it's at offset 0x20
+//	unsigned long long* variableNameHashes;
+//
+//	idClass* (*createInstance)();
+//	idRenderModel* (*createModel)(const idDeclModelAsset* modelAsset, const unsigned int createFlags);
+//	classMetaDataInfo_t* metaData;
+//};
+#pragma pack(pop)
+
+struct idClass;
+template<typename T>
+struct  idHierarchy
+{
+	idHierarchy<T>* parent;
+	idHierarchy<T>* sibling;
+	idHierarchy<T>* child;
+	T* owner;
+};
+
+
+
+
+
+
+struct constantInfo_t {
+	//Offset 0x0,	 size 8
+	char* type;
+	//Offset 0x8,	 size 8
+	char* name;
+	//Offset 0x10,	 size 8
+	char* value;
+};
+
+struct functionPointerInfo_t {
+	//Offset 0x0,	 size 8
+	char* name;
+	//Offset 0x8,	 size 8
+	void* ptr;
+};
+
+
+struct typeInfo_t {
+	//Offset 0x0,	 size 8
+	constantInfo_t* constants;
+	//Offset 0x8,	 size 4
+	int numConstants;
+	//Offset 0x10,	 size 8
+	enumTypeInfo_t* enums;
+	//Offset 0x18,	 size 4
+	int numEnums;
+	//Offset 0x20,	 size 8
+	classTypeInfo_t* classes;
+	//Offset 0x28,	 size 4
+	int numClasses;
+	//Offset 0x30,	 size 8
+	typedefInfo_t* typedefs;
+	//Offset 0x38,	 size 4
+	int numTypedefs;
+	//Offset 0x40,	 size 8
+	functionPointerInfo_t* functionPointers;
+	//Offset 0x48,	 size 4
+	int numfunctionPointers;
+};
+
+
+
+struct idTypeInfoTools {
+	//Offset 0x0,	 size 8
+	typeInfo_t* typeInfo;
+	//Offset 0x8,	 size 40
+	idHashIndex enumHash;
+	//Offset 0x30,	 size 40
+	idHashIndex classHash;
+	//Offset 0x58,	 size 32
+	idList /*< idTypeInfoTools::readWrite_t, TAG_IDLIB, false >*/ enumObject;
+	//Offset 0x78,	 size 32
+	idList /*< idTypeInfoTools::readWrite_t, TAG_IDLIB, false >*/ enumPointer;
+	//Offset 0x98,	 size 32
+	idList /*< idTypeInfoTools::readWrite_t, TAG_IDLIB, false >*/ classObject;
+	//Offset 0xB8,	 size 32
+	idList /*< idTypeInfoTools::readWrite_t, TAG_IDLIB, false >*/ classPointer;
+	//Offset 0xD8,	 size 32
+	char jsonSerializers[32];//idHashTableT < idStr, idTypeInfoTools::jsonReadWrite_t, 4 > jsonSerializers;
+	//Offset 0xF8,	 size 32
+	char jsonIgnoredVariables[32];  //idHashTableT < idStr, idList < idStr, TAG_IDLIB >, 4 > jsonIgnoredVariables;
+	//Offset 0x118,	 size 4
+	int editDepth;
+	//Offset 0x11C,	 size 4
+	int designDepth;
+	//Offset 0x120,	 size 4
+	int defDepth;
+	//Offset 0x128,	 size 32
+	idList  warnings;/*< idStr, TAG_IDLIST, false >*/
+};
+
 
 
 

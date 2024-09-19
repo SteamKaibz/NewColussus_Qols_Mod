@@ -171,6 +171,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ImGui\menu\liveStatsGui.h" />
+    <ClInclude Include="TypeGenerator\IdaScriptsGen.h" />
+    <ClInclude Include="Wolf2\statsManager.h" />
+    <ClInclude Include="Wolf2\structs_K.h" />
     <ClInclude Include="Wolf2\weaponStateManager.h" />
     <ClInclude Include="Wolf2\idAutomapManager.h" />
     <ClInclude Include="Wolf2\languageManager.h" />
@@ -294,6 +298,9 @@
     <ClInclude Include="xinput_module_manager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ImGui\menu\liveStatsGui.cpp" />
+    <ClCompile Include="TypeGenerator\IdaScriptsGen.cpp" />
+    <ClCompile Include="Wolf2\statsManager.cpp" />
     <ClCompile Include="Wolf2\weaponStateManager.cpp" />
     <ClCompile Include="Wolf2\idAutomapManager.cpp" />
     <ClCompile Include="Wolf2\languageManager.cpp" />

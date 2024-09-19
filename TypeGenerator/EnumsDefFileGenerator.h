@@ -102,6 +102,7 @@ public:
 
         std::vector<enumTypeInfo_t*> enumTypesInfoVec;
 
+
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("playerType_t"));
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("idPlayer::playerUseState_t"));
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("gameState_t"));
@@ -109,6 +110,8 @@ public:
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("idPlayer::animSysNodeFlags_t"));
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("shellScreen_t"));
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("idPlayerHud::hudState_t"));
+        enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("gameStat_t"));
+        enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("equipSlot_t"));
 
 
         for (size_t i = 0; i < enumTypesInfoVec.size(); i++)

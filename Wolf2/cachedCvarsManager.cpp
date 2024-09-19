@@ -4,7 +4,7 @@ idCVar* cachedCvarsManager::m_windowWidthCached = nullptr;
 idCVar* cachedCvarsManager::m_windowHeightCached = nullptr;
 idCVar* cachedCvarsManager::m_win_hasFocusCached = nullptr;
 idCVar* cachedCvarsManager::m_swf_safeFrameCached = nullptr;
-idCVar* cachedCvarsManager::m_swf_timescaleCached = nullptr;
+idCVar* cachedCvarsManager::m_timescaleCached = nullptr;
 idCVar* cachedCvarsManager::m_swf_skipRenderText = nullptr;
 idCVar* cachedCvarsManager::m_pm_animCamAmount = nullptr;
 idCVar* cachedCvarsManager::m_sensitivity = nullptr;
@@ -52,11 +52,12 @@ bool cachedCvarsManager::cacheCriticalCvars()
 		return false;
 	}
 
-	m_swf_timescaleCached = (idCVar*)idCvarManager::getCvarPtr("timescale"); 
-	if (MemHelper::isBadReadPtr(m_swf_timescaleCached)) {
+	m_timescaleCached = (idCVar*)idCvarManager::getCvarPtr("timescale"); 
+	if (MemHelper::isBadReadPtr(m_timescaleCached)) {
 		logErr("acquireCvarsPtrs: failed to find timescale");
 		return false;
 	}
+	
 
 	m_swf_skipRenderText = (idCVar*)idCvarManager::getCvarPtr("swf_skipRenderText");
 	if (MemHelper::isBadReadPtr(m_swf_skipRenderText)) {
@@ -168,25 +169,27 @@ void cachedCvarsManager::setSafeFrameToDefault() {
 
 
 
-void cachedCvarsManager::setTimescale(float timeScaleF) {
-	if (m_swf_timescaleCached) {		
-		if (m_swf_timescaleCached->valueFloat != timeScaleF) {
-			logInfo("setTimescale: changing timescale from: %.2f to %.2f", m_swf_timescaleCached->valueFloat, timeScaleF);
-			m_swf_timescaleCached->valueFloat = timeScaleF;
-		}
-		return;
-	}
-	logErr("setTimescale: failed to find cvar");
-}
+//void cachedCvarsManager::setTimescale(float timeScaleF) {
+//	if (m_timescaleCached) {		
+//		if (m_timescaleCached->valueFloat != timeScaleF) {
+//			logInfo("setTimescale: changing timescale from: %.2f to %.2f", m_timescaleCached->valueFloat, timeScaleF);
+//			m_timescaleCached->valueFloat = timeScaleF;
+//		}
+//		return;
+//	}
+//	logErr("setTimescale: failed to find cvar");
+//}
 
 
 float cachedCvarsManager::getTimescaleF() {
-	if (m_swf_timescaleCached) {
-		return m_swf_timescaleCached->valueFloat;		
+	if (m_timescaleCached) {
+		return m_timescaleCached->valueFloat;		
 	}
 	logErr("setTimescale: failed to find cvar returning 0.0");
 	return 0.0f;
 }
+
+
 
 void cachedCvarsManager::skipRenderText(bool isSkipRenderText) {
 	if (m_swf_skipRenderText) {
@@ -322,10 +325,10 @@ bool cachedCvarsManager::setUserAnimCamAmountProgressive()
 
 
 //bool cachedCvarsManager::isFastForwardTimeScale() {
-//	if (m_swf_timescaleCached) {
+//	if (m_timescaleCached) {
 //		return false;
 //	}
-//	return m_swf_timescaleCached->valueFloat == 
+//	return m_timescaleCached->valueFloat == 
 //
 //}
 //float cachedCvarsManager::get_Fov() {

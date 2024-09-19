@@ -138,6 +138,25 @@ bool TypeInfoManager::acquirreFindEnumInfoFuncPtr(__int64 funcAddr)
 }
 
 
+typeInfo_t* TypeInfoManager::getTypeInfo_t() {
+
+	if (MemHelper::isBadReadPtr((void*)m_typeInfoToolsPtrAddr)) {
+		logErr("getTypeInfo_t: m_typeInfoToolsPtrAddr is bad ptr returning");
+		return nullptr;
+	}
+
+	idTypeInfoTools* typeInfoTools = (idTypeInfoTools*)m_typeInfoToolsPtrAddr;
+
+	if (!typeInfoTools->typeInfo) {
+		logErr("getTypeInfo_t: typeInfoTools->typeInfo is nullptr !");
+		return nullptr;
+	}
+
+	return typeInfoTools->typeInfo;
+
+}
+
+
 
 classTypeInfo_t* TypeInfoManager::findClassInfo(const char* className)
 {

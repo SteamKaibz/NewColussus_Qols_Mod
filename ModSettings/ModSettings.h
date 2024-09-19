@@ -137,7 +137,8 @@ public:
     bool isSetAutoMapDefaultZoomToMin;
    
     bool isAdsToggle;
-    unsigned int zoomKeyVkCode;               
+    unsigned int zoomKeyVkCode;          
+    bool isSwapBindsWhenDualWielding;
 
     bool isFreeLeanOnly;
     float headBobAmount;

@@ -47,8 +47,14 @@ public:
 
 	static std::string intToHexString(__int64 decimalValue);
 
+	static std::string boolToStr(bool isTrue);
+
 	static bool saveSetToFile(std::string fileName, std::set<std::string> StrSet);
 	static bool saveVecToFile(std::string fileName, std::vector<std::string> StrVec);
+
+	static bool saveStrToFile(std::string filePath, std::string str);
+
+	static std::string removeSpaces(const std::string& str);
 
 	static void removeDuplicates(const std::string& inputFilePath, const std::string& outputFilePath);
 

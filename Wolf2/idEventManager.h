@@ -59,5 +59,15 @@ public:
 	static std::string getidEventDefToStr(idEventDef* idEventDefPtr);
 	static void listAllEventsToFile();
 
+	static std::vector<idEventDef*> getEventsVec();
+
+	static void generateEventNumsEnumFile();
+
+	static void generateEventNumsEnumFileFor_0xcb58c0();
+
+	static std::string getEventNumAsEnumMember(size_t index, idEventDef* eventDefPtr, bool is_0xcb58c0_SpecialCase = false);
+
+	//static std::string getEventNumAsEnumMember(size_t index, idEventDef* eventDefPtr);
+
 };
 

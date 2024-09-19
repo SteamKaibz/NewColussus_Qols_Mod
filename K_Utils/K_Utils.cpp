@@ -104,6 +104,14 @@ std::string K_Utils::intToHexString(__int64 decimalValue) {
 	return ss.str();
 }
 
+
+std::string K_Utils::boolToStr(bool isTrue) {
+	if (isTrue) {
+		return "true";
+	}
+	return "false";
+}
+
 bool K_Utils::saveSetToFile(std::string fileName, std::set<std::string> StrSet)
 {
 	int counter = 0;
@@ -139,6 +147,35 @@ bool K_Utils::saveVecToFile(std::string fileName, std::vector<std::string> StrVe
 }
 
 
+bool K_Utils::saveStrToFile(std::string filePath, std::string str) {
+	// Create an ofstream object and open the file
+	std::ofstream outFile(filePath);
+
+	// Check if the file opened successfully
+	if (outFile.is_open()) {
+		// Write the string to the file
+		outFile << str;
+
+		// Close the file
+		outFile.close();
+
+		logInfo("saveStrToFile: succes saving str to file: %s ", filePath.c_str());
+
+		return true;
+	}
+	else {
+		logErr("saveStrToFile: ERROR saving str to file: %s ", filePath.c_str());
+	}
+
+	return false;
+}
+
+
+std::string K_Utils::removeSpaces(const std::string& str) {
+	std::string result = str; // Copy the input string to avoid modifying the original
+	result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+	return result;
+}
 
 
 void K_Utils::removeDuplicates(const std::string& inputFilePath, const std::string& outputFilePath) {

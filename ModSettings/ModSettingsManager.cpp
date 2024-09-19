@@ -9,20 +9,20 @@ ModSettings ModSettingsManager::m_modSettings;
 void ModSettingsManager::updateCvars() {
 	logInfo("updating cvars... ");
 	if (Config::getConfig() != ModConfig::debug) {
-		idCvarManager::setCvar("win_pauseOnAltTab", "1");
+		idCmdManager::executeCmd("win_pauseOnAltTab 1");
 	}	
 
-	idCvarManager::setCvar("view_showWorldMarkers", "1");
-	idCvarManager::setCvar("view_kickAmplitude_max", std::to_string(m_modSettings.viewKickMax));     
-	idCvarManager::setCvar("r_blurGaussian", std::to_string(m_modSettings.isEnableGaussianBlur));
-	idCvarManager::setCvar("r_skipFog", std::to_string(m_modSettings.isSkipFog));
-	idCvarManager::setCvar("r_hdrDebug", std::to_string(m_modSettings.isHdrDisabled));
-	idCvarManager::setCvar("r_saturation", std::to_string(m_modSettings.colorSaturation));
-	idCvarManager::setCvar("view_scoreScale", std::to_string(m_modSettings.isShowHudScoreDamageNumbers));
-	idCvarManager::setCvar("player_analyzeEnvFreeLeanOnly", std::to_string(m_modSettings.isFreeLeanOnly));
-	idCvarManager::setCvar("swf_safeFrame", std::to_string(m_modSettings.hudSafeFrameOffset));
-
+	idCmdManager::executeCmd("view_showWorldMarkers 1");
+	idCmdManager::executeCmd("view_kickAmplitude_max", std::to_string(m_modSettings.viewKickMax));
+	idCmdManager::executeCmd("r_blurGaussian", std::to_string(m_modSettings.isEnableGaussianBlur));
+	idCmdManager::executeCmd("r_skipFog", std::to_string(m_modSettings.isSkipFog));
+	idCmdManager::executeCmd("r_hdrDebug", std::to_string(m_modSettings.isHdrDisabled));
+	idCmdManager::executeCmd("r_saturation", std::to_string(m_modSettings.colorSaturation));
+	idCmdManager::executeCmd("view_scoreScale", std::to_string(m_modSettings.isShowHudScoreDamageNumbers));
+	idCmdManager::executeCmd("player_analyzeEnvFreeLeanOnly", std::to_string(m_modSettings.isFreeLeanOnly));
+	idCmdManager::executeCmd("swf_safeFrame", std::to_string(m_modSettings.hudSafeFrameOffset));
 }
+
 
 
 void ModSettingsManager::updateFromImGui(const ModSettings modSettings)
@@ -203,6 +203,10 @@ std::string ModSettingsManager::getNormalSpeedKeyBindStr() {
 	return ModSettings::keyCodeToString(m_modSettings.normalSpeedKeyVkCode);
 }
 
+std::string ModSettingsManager::getFastForwardKeyBindStr() {
+	return ModSettings::keyCodeToString(m_modSettings.fastForwardKeyVkCode);
+}
+
 unsigned int ModSettingsManager::getFlashLightKeyCode() {
 	return m_modSettings.flashLightKeyVkCode;
 }
@@ -280,6 +284,12 @@ bool ModSettingsManager::isAdsToggleEnabled() {
 unsigned int ModSettingsManager::getZoomKeyVkCode() {
 	return m_modSettings.zoomKeyVkCode;
 }
+
+bool ModSettingsManager::isSwapBindsWhenDualWielding() {
+	return m_modSettings.isSwapBindsWhenDualWielding;
+}
+
+
 
 float ModSettingsManager::getHeadBobAmount() {
 	return m_modSettings.headBobAmount;

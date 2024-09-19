@@ -33,8 +33,8 @@ private:
 
 	
 
-	std::string basename(std::string const& pathname);
-	std::string GetGameExeNameToLower();
+	static std::string basename(std::string const& pathname);
+	static std::string GetGameExeNameToLower();
 
 
 
@@ -72,7 +72,8 @@ public:
 	static bool overwriteInstructionIfNotEqual(std::string refStr, const uintptr_t instructionAddr, std::vector<unsigned char> newInstructionVec);
 	static bool isSameByteArrays(const BYTE* array1, const BYTE* array2, size_t length);
 	static DWORD64 PatternScan(const char* szModule, const char* signature);
-	static DWORD64 ModulePatternScan(std::string moduleName, std::string scanFriendlyName, const char* signature);
+	static DWORD64 ModulePatternScan(std::string scanFriendlyName, const char* signature);
+	//static DWORD64 ModulePatternScan(std::string moduleName, std::string scanFriendlyName, const char* signature);
 
 	static DWORD64 PatternScanForCurrentModule(const char* signature);
 

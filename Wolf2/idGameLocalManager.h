@@ -23,5 +23,6 @@ public:
 	static __int64 getIdWorldspawn();
 	static __int64 getCurrentGameTime(); //! for auto pickup func
 	static std::string getCurrentMapName();
+	static idPlayerMetrics* getidPlayerMetrics();
 };
 

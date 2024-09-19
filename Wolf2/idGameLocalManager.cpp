@@ -100,3 +100,23 @@ std::string idGameLocalManager::getCurrentMapName() {
 	//return (const char*)(idGameLocal + 0xD0C98);
 
 }
+
+
+idPlayerMetrics* idGameLocalManager::getidPlayerMetrics() {
+
+	if (MemHelper::isBadReadPtr((void*)m_idGameLocalPtr)) {
+		return nullptr;
+	}
+
+	idGameLocal* gameLocal = (idGameLocal*)*(__int64*)m_idGameLocalPtr;
+	if (!gameLocal) {
+		return nullptr;
+	}
+
+	if (!gameLocal->gameMetrics) {
+		return nullptr;
+	}
+
+	return gameLocal->gameMetrics->players;
+
+}

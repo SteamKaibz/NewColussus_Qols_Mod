@@ -23,28 +23,7 @@ std::string idEventManager::eventTypeToString(eventType_t eventType) {
     }
 }
 
-//std::string idEventManager::getidEventDefToStr(idEventDef* idEventDefPtr) {
-//     std::string result = "";
-//    if (MemHelper::isBadReadPtr((void*)idEventDefPtr)) {
-//        logErr("printidEventDef: idEventDefPtr is bad ptr: %p", (void*)idEventDefPtr);
-//        return result;
-//    }
-//    result += "name: " + std::string(idEventDefPtr->name);
-//    result += "formatspec: " + std::string(idEventDefPtr->formatspec);
-//    result += "argTypes: " + std::string(idEventDefPtr->argTypes);
-//    result += "argDefaultValues: " + std::string(idEventDefPtr->argDefaultValues);
-//    result += "returnType: " + std::to_string(idEventDefPtr->returnType);
-//    result += "numargs: " + std::to_string(idEventDefPtr->numargs);
-//    result += "numstrings: " + std::to_string(idEventDefPtr->numstrings);
-//    result += "eventnum: " + std::to_string(idEventDefPtr->eventnum);
-//    result += "flags: " + std::to_string(idEventDefPtr->flags);
-//    std::string typeStr = eventTypeToString(idEventDefPtr->type);
-//    result += "typeStr: " + typeStr;
-//    result += "comment: " + std::string(idEventDefPtr->comment);  
-//    result += "\n";  
-//
-//    return result;
-//}
+
 
 std::string idEventManager::getidEventDefToStr(idEventDef* idEventDefPtr) {
     std::string result = "";
@@ -79,7 +58,7 @@ std::string idEventManager::getidEventDefToStr(idEventDef* idEventDefPtr) {
     return result;
 }
 
-
+//? 16/9/24 we could have done so much better as we have the funcs in idEventDefInterfaceLocal (26CC240) I guess that will do for now though....
 void idEventManager::listAllEventsToFile() {
 
     m_idEventDefStrVec.clear();
@@ -124,4 +103,137 @@ void idEventManager::listAllEventsToFile() {
 
     K_Utils::saveVecToFile(m_idEventDefFileName, m_idEventDefStrVec);
    
+}
+
+
+std::vector<idEventDef*> idEventManager::getEventsVec() {
+
+    std::vector<idEventDef*> resultVec;
+
+    int v2 = 0;
+    
+    __int64 maxEventNumAdd = MemHelper::getAddr(0x4297098);
+    if (MemHelper::isBadReadPtr((void*)maxEventNumAdd)) {
+        logErr("getEventsVec: maxEventNumAdd is bad ptr: %p", (void*)maxEventNumAdd);
+        return resultVec;
+    }
+    int maxEventNum = *(int*)maxEventNumAdd;
+    logInfo("getEventsVec : maxEventNum: %d", maxEventNum);
+
+    if (maxEventNum > 0) {
+        //! result: matches @ 0x42974A0, sig direct: D0 F3 44 3C F7 7F 00
+        __int64* idEventDefListPtr = (__int64*)MemHelper::getAddr(0x42974A0);
+        if (MemHelper::isBadReadPtr((void*)idEventDefListPtr)) {
+            logErr("getEventsVec: idEventDefListPtr is bad ptr: %p", (void*)idEventDefListPtr);
+            return resultVec;
+        }
+        logInfo("getEventsVec : idEventDefListPtr: %p", (void*)idEventDefListPtr);
+
+
+        do {
+            idEventDef* eventDefPtr = (idEventDef*)*idEventDefListPtr;
+            if (MemHelper::isBadReadPtr(eventDefPtr)) {
+                logErr("getEventsVec: eventDefPtr is bad ptr: %p", eventDefPtr);
+                return resultVec;
+            }
+            resultVec.push_back(eventDefPtr);
+                   
+            ++v2;
+            ++idEventDefListPtr;
+        } while (v2 < maxEventNum);
+    }
+
+    logInfo("getEventsVec: dbg: returning %zu events", resultVec.size());
+    return resultVec;
+
+}
+
+
+void idEventManager::generateEventNumsEnumFile() {
+
+    unsigned int eventsPtrCounter = 0;
+    unsigned int eventsStrCounter = 0;
+
+    std::vector<std::string> numEventK_tDefStrVec;
+    std::string enumHeaderStr = "enum eventNumK_t {";
+    numEventK_tDefStrVec.push_back(enumHeaderStr);
+
+
+    std::vector<idEventDef*> eventDefsPtrs = getEventsVec();
+    for (size_t i = 0; i < eventDefsPtrs.size(); i++)
+    {
+        numEventK_tDefStrVec.push_back(getEventNumAsEnumMember(i, eventDefsPtrs[i]));
+        eventsStrCounter++;
+    }
+
+    std::string enumLastLineStr = "};";
+    numEventK_tDefStrVec.push_back(enumLastLineStr);
+
+
+    /* logInfo("generateEventNumsEnumFile: found : %u events Str, saving to file: %s", eventsPtrCounter, Config::.c_str());*/
+    K_Utils::saveVecToFile("Wolf2_EventsAsEnum.h", numEventK_tDefStrVec);
+
+}
+
+//! special case where switch statement is done a a transformed value of event num.
+void idEventManager::generateEventNumsEnumFileFor_0xcb58c0() {
+
+    unsigned int eventsPtrCounter = 0;
+    unsigned int eventsStrCounter = 0;
+
+    const bool b_SpecialCasefor0xcb58c0 = true;
+
+    std::vector<std::string> numEventK_tDefStrVec;
+    std::string enumHeaderStr = "enum eventNumK_0xcb58c0_t {";
+    numEventK_tDefStrVec.push_back(enumHeaderStr);
+
+
+    std::vector<idEventDef*> eventDefsPtrs = getEventsVec();
+    for (size_t i = 0; i < eventDefsPtrs.size(); i++)
+    {
+        numEventK_tDefStrVec.push_back(getEventNumAsEnumMember(i, eventDefsPtrs[i], b_SpecialCasefor0xcb58c0));
+        eventsStrCounter++;
+    }
+
+    std::string enumLastLineStr = "};";
+    numEventK_tDefStrVec.push_back(enumLastLineStr);
+
+
+    /* logInfo("generateEventNumsEnumFile: found : %u events Str, saving to file: %s", eventsPtrCounter, Config::.c_str());*/
+    K_Utils::saveVecToFile("Wolf2_EventsAsEnumSpecial.h", numEventK_tDefStrVec);
+
+}
+
+
+std::string idEventManager::getEventNumAsEnumMember(size_t index, idEventDef* eventDefPtr, bool is_0xcb58c0_SpecialCase) {
+
+    static bool isFirstTime = true;
+    std::string result;
+
+    if (MemHelper::isBadReadPtr(eventDefPtr)) {
+        logErr("getEventNumAsEnumMember: found bad ptr: %p", eventDefPtr);
+        return "!!!ERROR!!!";
+    }
+
+    std::string eventNameStr = eventDefPtr->name;
+    if (eventNameStr.empty()) {
+        eventNameStr = "!!!!! ERROR EVENT !!!!!";
+    }
+    else if(eventNameStr == "break") {
+        eventNameStr = "renamedK_break";
+    }
+    else if (is_0xcb58c0_SpecialCase && isFirstTime) {
+        eventNameStr = eventDefPtr->name;
+        eventNameStr+= " = - 0xD1";
+        isFirstTime = false;
+    } 
+
+    result += "\t";
+    result += eventNameStr;   
+    result += " , // index: ";
+    result += K_Utils::intToHexString(index);
+    result += " eventnum: ";
+    result += K_Utils::intToHexString(eventDefPtr->eventnum);
+
+    return result;
 }

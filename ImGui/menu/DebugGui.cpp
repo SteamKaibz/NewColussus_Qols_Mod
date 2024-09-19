@@ -14,6 +14,18 @@ void DebugGui::showDebugWindow(bool* p_open)
     ImGuiDebugWin::AddMessage("DEBUG:");
     ImGuiDebugWin::AddMessage("_");
 
+    std::string buttonsStr = "usercmd_t=>buttons: ";
+    buttonsStr += K_Utils::intToHexString(idUsercmdGenLocalManager::DBG_Buttons);
+    ImGuiDebugWin::AddMessage(buttonsStr);
+
+    std::string lastKeyPressedStr = "last key pressed: ";
+    std::string keyStr = idUsercmdGenLocalManager::debugGetLastA2InidKeyboardSmth_AE72A0Str();
+    lastKeyPressedStr += keyStr;
+
+    ImGuiDebugWin::AddMessage(idUsercmdGenLocalManager::debug_getFireKeysInfoStr());
+
+    ImGuiDebugWin::AddMessage(lastKeyPressedStr);
+
     ImGuiDebugWin::AddMessage(Debug::getCurrentMovementModeStr());
 
 
@@ -26,11 +38,22 @@ void DebugGui::showDebugWindow(bool* p_open)
     ImGuiDebugWin::AddMessage(Tests::getmovementModeDgbStrForImgui());
 
 
-    ImGuiDebugWin::AddMessage(hudManager::inGuiGetDualWieldInfo());       
+    std::string dwInfoStr = "Is Dual Wielding: ";
+    dwInfoStr += K_Utils::boolToStr(idPlayerManager::isDualWielding());
+    ImGuiDebugWin::AddMessage(dwInfoStr);
 
-    std::string preMoveEventStr = "PreMoveEvent: ";
-    preMoveEventStr += std::to_string((int)idPlayerManager::getPreMoveEvent());
-    ImGuiDebugWin::AddMessage(preMoveEventStr);
+    ImGuiDebugWin::AddMessage(idPlayerManager::getAnimSysEventsDgbStrForImgui());
+
+    ImGuiDebugWin::AddMessage(cameraManager::getAnimCamAmountDbgStrForImgui());
+
+    std::string leanModeStr = "is Leaning: ";
+    if (idPlayerManager::isLeaning()) {
+        leanModeStr += "true";
+    }
+    else {
+        leanModeStr += "false";
+    }    
+    ImGuiDebugWin::AddMessage(leanModeStr);
 
     std::string postFiringStr = "Is Post firing: ";
     postFiringStr += std::to_string(cameraManager::Dbg_isPostFiring);

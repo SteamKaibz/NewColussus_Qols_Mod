@@ -56,6 +56,7 @@ public:
     static unsigned int getFastForwardKeyCode();
 
     static std::string getNormalSpeedKeyBindStr();
+    static std::string getFastForwardKeyBindStr();
 
     static unsigned int getFlashLightKeyCode();
 
@@ -92,6 +93,8 @@ public:
     static bool isAdsToggleEnabled();
 
     static unsigned int getZoomKeyVkCode();
+
+    static bool isSwapBindsWhenDualWielding();
 
     static float getHeadBobAmount();
 

@@ -33,6 +33,17 @@ bool idCmdManager::acquireIdCmdExecuteFuncAddr(__int64 funcAddr)
 }
 
 
+idList* idCmdManager::getCmdlist() {
+
+	if (!m_idCmdSystemLocalAddr) {
+		return nullptr;
+	}
+
+	return (idList*)(m_idCmdSystemLocalAddr + 0x8);
+}
+
+
+
 void idCmdManager::executeCmd(std::string cmdStr) {
 	//logInfo("debug executeCmd 1");
 
@@ -44,12 +55,68 @@ void idCmdManager::executeCmd(std::string cmdStr) {
 		logErr("executeCmd: m_idCmdExecuteFuncAddr is null returning");
 		return;
 	}
-	logInfo("executeCmd: m_idCmdExecuteFuncAddr: %p", (void*)m_idCmdExecuteFuncAddr);
+	//logInfo("executeCmd: m_idCmdExecuteFuncAddr: %p", (void*)m_idCmdExecuteFuncAddr);
 	auto execCmdFunc = reinterpret_cast<idCmdSystemLocal__ExecuteCmd>(m_idCmdExecuteFuncAddr);
 	auto result = execCmdFunc(m_idCmdSystemLocalAddr, cmdStr.c_str());
-	//logInfo("debug executeCmd 2");
+	
 
 }
+
+
+void idCmdManager::executeCmd(std::string cmdStr, std::string argStr) {
+
+	std::string concatCmdStr = cmdStr + " " + argStr;
+	executeCmd(concatCmdStr);
+}
+
+
+void idCmdManager::init() {
+
+
+	executeCmd("in_unlockMouseInMenus 0");
+	executeCmd("view_showWorldMarkers 1");
+
+	setCriticalCvars();
+}
+
+
+void idCmdManager::setCriticalCvars() {
+
+	if (ModSettingsManager::getIsUseImgui()) {
+
+		executeCmd("menu_showOptionForDevMenu 1");
+	}
+	else {
+		executeCmd("menu_showOptionForDevMenu 0");
+	}
+
+	executeCmd("g_showHud 1");
+	executeCmd("com_skipGameRenderView 0");
+	executeCmd("r_skipGuis 0");
+	executeCmd("swf_skipRender 0");
+	executeCmd("swf_skipRenderText 0");
+	executeCmd("r_vignette 0");
+	executeCmd("view_showWorldMarkers 1");
+
+	std::string swfSafeFrameDefCmdStr = "swf_safeFrame " + std::to_string(swf_safeFrameMax);
+	executeCmd(swfSafeFrameDefCmdStr);
+
+}
+
+
+
+
+
+
+void idCmdManager::setTimeScale(float timeScaleF) {
+
+	std::string cmdStr = "timescale ";
+	cmdStr += std::to_string(timeScaleF);
+	executeCmd(cmdStr);
+}
+
+
+//void idCmdManager::bindKey()
 
 //void idCmdManager::testCmd(std::string cmdStr)
 //{
@@ -107,66 +174,66 @@ void idCmdManager::findDecription(std::string cmdStr)
 	logInfo("findDecription: result: %s", result);
 }
 
-void idCmdManager::listAllCmds()
-{
-	//! result: matches @ 0x4104420, sig direct: 18 86 E6 3B F7 7F
-	__int64 idCmdSystemLocal = MemHelper::getAddr(0x4104420);
-	if (MemHelper::isBadReadPtr((void*)idCmdSystemLocal)) {
-		logErr("findDecription: idCmdSystemLocal is bad ptr: %p returning", (void*)idCmdSystemLocal);
-		return;
-	}
-	logInfo("findDecription: idCmdSystemLocal: %p", (void*)idCmdSystemLocal);
+//void idCmdManager::listAllCmds()
+//{
+//	//! result: matches @ 0x4104420, sig direct: 18 86 E6 3B F7 7F
+//	__int64 idCmdSystemLocal = MemHelper::getAddr(0x4104420);
+//	if (MemHelper::isBadReadPtr((void*)idCmdSystemLocal)) {
+//		logErr("findDecription: idCmdSystemLocal is bad ptr: %p returning", (void*)idCmdSystemLocal);
+//		return;
+//	}
+//	logInfo("findDecription: idCmdSystemLocal: %p", (void*)idCmdSystemLocal);
+//
+//	__int64 v3 = 0x28i64;
+//	if (!*(DWORD*)(idCmdSystemLocal + 0x200B8))
+//		v3 = 8i64;
+//	if (!(*(int*)(v3 + idCmdSystemLocal + 8) > 0)) {
+//		//! check inspiration func: 0x1264EB0 for more context
+//		logErr("listAllCmds: code error relative to original func, returning");
+//		return;
+//	}
+//
+//
+//}
 
-	__int64 v3 = 0x28i64;
-	if (!*(DWORD*)(idCmdSystemLocal + 0x200B8))
-		v3 = 8i64;
-	if (!(*(int*)(v3 + idCmdSystemLocal + 8) > 0)) {
-		//! check inspiration func: 0x1264EB0 for more context
-		logErr("listAllCmds: code error relative to original func, returning");
-		return;
-	}
-
-
-}
-
-void idCmdManager::listAllCmdsV2()
-{
-	std::vector<CmdData> results; // Create a vector to store the results
-	//! result: matches @ 0x4104420, sig direct: 18 86 E6 3B F7 7F
-	__int64 idCmdSystemLocal = MemHelper::getAddr(0x4104420);
-	if (MemHelper::isBadReadPtr((void*)idCmdSystemLocal)) {
-		logErr("listAllCmdsV2: idCmdSystemLocal is bad ptr: %p returning", (void*)idCmdSystemLocal);
-		return;
-	}
-	logInfo("listAllCmdsV2: idCmdSystemLocal: %p", (void*)idCmdSystemLocal);
-		
-
-	__int64 v3 = (*(DWORD*)(idCmdSystemLocal + 0x200B8) != 0) ? 0x28i64 : 8i64;
-	int numElements = *(int*)(v3 + idCmdSystemLocal + 8);
-	logInfo("listAllCmdsV2: numElements: %d", numElements);
-	__int64 cmdListAddr = *(__int64*)(v3 + idCmdSystemLocal);
-	//char*** v4 = *(char****)(v3 + idCmdSystemLocal);
-
-	for (int i = 0; i < numElements; ++i) {
-
-		if (MemHelper::isBadReadPtr((void*)cmdListAddr)) {
-			logErr("listAllCmdsV2: found bad ptr: %p breaking", (void*)cmdListAddr);
-			break;
-		}
-		__int64 CmdDataPtr = *(__int64*)cmdListAddr;
-		CmdData result = *(CmdData*)CmdDataPtr;
-		results.push_back(result);
-		cmdListAddr += 8;
-	}
-
-	logInfo("listAllCmdsV2: found %zu CmdData results: ", results.size());
-	for (size_t i = 0; i < results.size(); i++)
-	{
-		__int64 funcOffset = (uintptr_t)results[i].callBackPtr - MemHelper::getModuleBaseAddr();
-		logInfo("name: %s callFuncPtr offset: %p", results[i].name, (void*)funcOffset);
-	}
-	
-}
+//void idCmdManager::listAllCmdsV2()
+//{
+//	std::vector<CmdData> results; // Create a vector to store the results
+//	//! result: matches @ 0x4104420, sig direct: 18 86 E6 3B F7 7F
+//	__int64 idCmdSystemLocal = MemHelper::getAddr(0x4104420);
+//	if (MemHelper::isBadReadPtr((void*)idCmdSystemLocal)) {
+//		logErr("listAllCmdsV2: idCmdSystemLocal is bad ptr: %p returning", (void*)idCmdSystemLocal);
+//		return;
+//	}
+//	logInfo("listAllCmdsV2: idCmdSystemLocal: %p", (void*)idCmdSystemLocal);
+//		
+//
+//	__int64 v3 = (*(DWORD*)(idCmdSystemLocal + 0x200B8) != 0) ? 0x28i64 : 8i64;
+//	int numElements = *(int*)(v3 + idCmdSystemLocal + 8);
+//	logInfo("listAllCmdsV2: numElements: %d", numElements);
+//	__int64 cmdListAddr = *(__int64*)(v3 + idCmdSystemLocal);
+//	//char*** v4 = *(char****)(v3 + idCmdSystemLocal);
+//
+//	for (int i = 0; i < numElements; ++i) {
+//
+//		if (MemHelper::isBadReadPtr((void*)cmdListAddr)) {
+//			logErr("listAllCmdsV2: found bad ptr: %p breaking", (void*)cmdListAddr);
+//			break;
+//		}
+//		__int64 CmdDataPtr = *(__int64*)cmdListAddr;
+//		CmdData result = *(CmdData*)CmdDataPtr;
+//		results.push_back(result);
+//		cmdListAddr += 8;
+//	}
+//
+//	logInfo("listAllCmdsV2: found %zu CmdData results: ", results.size());
+//	for (size_t i = 0; i < results.size(); i++)
+//	{
+//		__int64 funcOffset = (uintptr_t)results[i].callBackPtr - MemHelper::getModuleBaseAddr();
+//		logInfo("name: %s callFuncPtr offset: %p", results[i].name, (void*)funcOffset);
+//	}
+//	
+//}
 
 //? this crashes which is not surprising.
 __int64 idCmdManager::mdnt_list_active_F69400() {

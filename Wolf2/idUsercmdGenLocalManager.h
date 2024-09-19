@@ -5,7 +5,9 @@
 #include "../K_Utils/K_Utils.h"
 #include "GeneratedClasses.h"
 #include "GeneratedEnums.h"
-
+#include "TypeInfoManager.h"
+#include "idPlayerManager.h"
+#include <climits>  // or <limits.h> for UINT_MAX
 
 
 //! this actually is a 2 bytes val in lib it seems but it makes more sens as an int.
@@ -231,7 +233,33 @@ enum keyNum_t {
 };
 
 
-//! created in reclass with 
+struct Bind_K {
+	cmdGenButton_t action = UB_NONE;
+	std::vector<keyNum_t> keyNumsVec; // key can be a keyboard key, a mouse btn, or even a joystick btn.    
+
+	Bind_K(cmdGenButton_t action_arg) : action(action_arg) {}
+
+	bool isBound() {
+		return !keyNumsVec.empty();
+	}
+
+	bool isBoundToKey(keyNum_t keyNum) {
+		for (keyNum_t key : keyNumsVec) {
+			if (keyNum == key) return true;
+		}
+		return false;
+	}
+
+	// Equality operator to compare two Bind_K instances
+	bool operator==(const Bind_K& other) const {
+		// Compare 'action' and 'keyNumsVec'
+		return (action == other.action) && (keyNumsVec == other.keyNumsVec);
+	}
+};
+
+
+
+//! created in reclass. You can get this struct from
 //#pragma pack(push, 1) // making sure no padding is added by compiler
 class ButtonInfo_K
 {
@@ -249,60 +277,12 @@ public:
 //#pragma pack(pop) // Restore default packing alignment
 
 
-
-
-//class usercmd_t
-//{
-//public:
-//	uint64_t gameTime; //0x0000
-//	bool fromBot; //0x0008
-//	bool inhibited; //0x0009
-//	char pad_000A[2]; //0x000A
-//	int32_t buttons; //0x000C
-//	int8_t forwardmove; //0x0010
-//	int8_t forwardmoveSec; //0x0011
-//	int8_t rightmove; //0x0012
-//	int8_t rightmoveSec; //0x0013
-//	int8_t upmove; //0x0014
-//	char pad_0015[110]; //0x0015
-//}; //? not complete btw
-
-
-
-//enum usercmdButton_t {
-//	BUTTON_ATTACK1 = 1,
-//	BUTTON_ZOOM = 2,
-//	BUTTON_MELEE = 4,
-//	BUTTON_USE = 8,
-//	BUTTON_RELOAD = 16,
-//	BUTTON_USE_AND_RELOAD = 32,
-//	BUTTON_QGRENADE = 128,
-//	BUTTON_WPNSEL = 256,
-//	BUTTON_QGRENADE_AND_WPNSEL = 512,
-//	BUTTON_SPRINT = 64,
-//	BUTTON_WEAP_PREV_EQUIP = 1024,
-//	BUTTON_WEAP_NEXT = 2048,
-//	BUTTON_WEAP_PREV = 4096,
-//	BUTTON_WEAP_FUNC_LEFT = 8192,
-//	BUTTON_WEAP_0 = 16384,
-//	BUTTON_WEAP_1 = 32768,
-//	BUTTON_WEAP_2 = 65536,
-//	BUTTON_WEAP_3 = 131072,
-//	BUTTON_WEAP_4 = 262144,
-//	BUTTON_WEAP_5 = 524288,
-//	BUTTON_WEAP_TOGGLE_UPGRADE_LEFT = 1048576,
-//	BUTTON_WEAP_TOGGLE_UPGRADE_RIGHT = 2097152,
-//	BUTTON_COVERMODE = 4194304,
-//	BUTTON_WALK = 8388608,
-//	BUTTON_TOGGLEDW = 16777216,
-//	BUTTON_INVENTORY = 33554432,
-//	BUTTON_MOVEUP = 67108864,
-//	BUTTON_MOVEDOWN = 134217728,
-//	BUTTON_HINT = 268435456,
-//	BUTTON_ANY = -1
-//};
-
-
+struct KeyNumToStr_K {
+	keyNum_t keyNum;
+	int pad;
+	const char* keyNumToStr;
+	const char* keyNumInternalBindStr;
+};
 
 
 
@@ -312,19 +292,24 @@ class idUsercmdGenLocalManager
 {
 private:
 
-	//static __int64 m_idUsercmdGenLocal;
+	static inline unsigned int m_lastA2In_idKeyboardSmth_AE72A0 = -1;
 
-	//static usercmd_t* usercmd_t_Static;
+	static inline __int64 m_sendKeyFuncAddr = 0;
+	static inline __int64 m_keynumsToKeyNameListAddr = 0;
 
-	static unsigned int m_lastA2In_idKeyboardSmth_AE72A0;
+	static inline keyNum_t m_current_use_keyNum = keyNum_t::K_NONE;
 
-	static __int64 m_sendKeyFuncAddr;
+	static inline Bind_K  m_attack1_UserBindK = Bind_K(UB_ATTACK1);
+	static inline Bind_K  m_zoom_UserBindK = Bind_K(UB_ZOOM);
+	static inline bool m_isFireKeysBindsSet = false;
 
-	static keyNum_t m_current_use_keyNum;
 
 	typedef __int64(__fastcall* idUsercmdGenLocalSmth_t)(__int64 idUsercmdGenLocal_a1, unsigned int a2, int keyNum_a3, char isDown_a4);
 
+
 public:
+
+	static inline int DBG_Buttons = -1;
 
 	//static void acquireIdUsercmdGenLocal(__int64 IdUsercmdGenLocal);
 
@@ -332,10 +317,32 @@ public:
 
 	static void sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int a2, bool isKeyDown);
 
-	static void sendFakeKeyPress(__int64 idUsercmdGenLocal_a1, keyNum_t keyNum, unsigned int a2, bool isKeyDown);
+	static void tryCacheGameFireKeysBinds();
+
+	static bool isAttack1Key(keyNum_t keynum);
+
+	static bool isZoomKey(keyNum_t keynum);
+
+	//static void restoreFireKeysBinds();
+
+	//static void invertFireKeysBinds();
+
+	static bool isFireKeysBindsSet();
+
+	static void dbgLogHookArgsChanges(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, keyNum_t keyNum_a3, char isDown_a4);
+
+	static std::string debug_getFireKeysInfoStr();
+
+	static bool isButtonPressed(int usercmdButtonFlags, usercmdButton_t button);
+
+	static void setButtonFlag(int& usercmdButtonFlags, usercmdButton_t button, bool isPressed);
+
+	static void invertZoomAndAttack(int& usercmdButtonFlags);
+
+	//static void sendFakeKeyPress(__int64 idUsercmdGenLocal_a1, keyNum_t keyNum, unsigned int a2, bool isKeyDown);
 
 
-	static void sendFakeZoomKeyPress(bool isKeyDown);
+	//static void sendFakeZoomKeyPress(bool isKeyDown);
 	//static void updateLastFakeKeyPressAndRelease();
 
 	static std::string debugGetLastA2InidKeyboardSmth_AE72A0Str();
@@ -357,6 +364,13 @@ public:
 	static cmdGenButton_t getUseKeyGenButton();
 
 	static void updateCurrentUseBtnKeyNum();
+
+	static Bind_K getKeyboardBind_K_ForAction(cmdGenButton_t cmd);
+
+	static std::string getKeyNameStrForKeyNum(keyNum_t keyNum);
+
+
+
 
 	static bool IsKeyPressed(usercmdButton_t button);
 

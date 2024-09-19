@@ -11,6 +11,9 @@ class fastForwardGui
 private:
 
 public:
-	static void showFastForwardIcon(bool* p_open = NULL);
+	//static void showFastForwardIcon(bool* p_open = NULL);
+	static std::string getCurrentSpeedStr();
+	static ImVec4& getSpeedTextColorVec4();
+	static void show(bool* p_open = NULL);
 };
 

@@ -173,8 +173,8 @@ void idMaterialManager::showMaterial(int index, idList* idListPtr) {
 	//std::string g_testMaterialStr = "g_testMaterial " + matrName;
 	logInfo("showMaterial: material: %p materialName addr: %p matrName: %s index is: %d", (void*)material, materialName, materialName, m_testIndex);
 	if (materialName) {
-		//cachedCvarsManager::testMaterial(materialName);
-		idCvarManager::setCvar("g_testMaterial", materialName);
+		idCmdManager::executeCmd("g_testMaterial", materialName);
+		//idCvarManager::setCvar("g_testMaterial", materialName);
 	}
 }
 
