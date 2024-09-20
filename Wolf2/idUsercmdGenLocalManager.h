@@ -272,7 +272,8 @@ public:
 	int32_t N0000091D; //0x0030
 	char pad_0034[4]; //0x0034
 	cmdGenButton_t cmdGenButtonVal; //0x0038
-	cmdGenButton_t UB_NONE_ButtonVal; //0x003C	
+	//? this one has a value of UB_NONE but may be it has value for joystick i'm investigating....
+	cmdGenButton_t cmdGenButtonVal_Uncertain; //0x003C
 }; 
 //#pragma pack(pop) // Restore default packing alignment
 
@@ -309,35 +310,42 @@ private:
 
 public:
 
-	static inline int DBG_Buttons = -1;
+	static inline int DBG_CmdTracker1_Buttons = -1;
+	static inline int DBG_RawCmdTracker_Buttons = -1;
+	static inline bool DBG_IsZoomBtnPressCheckActive = false;
 
 	//static void acquireIdUsercmdGenLocal(__int64 IdUsercmdGenLocal);
 
 	//static bool acquireUsercmdStatic(__int64 usercmd_t_StaticPtr);
 
-	static void sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int a2, bool isKeyDown);
 
-	static void tryCacheGameFireKeysBinds();
+	//static void sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int a2, bool isKeyDown);
 
-	static bool isAttack1Key(keyNum_t keynum);
+	//static void tryCacheGameFireKeysBinds();
 
-	static bool isZoomKey(keyNum_t keynum);
 
 	//static void restoreFireKeysBinds();
 
 	//static void invertFireKeysBinds();
 
-	static bool isFireKeysBindsSet();
+	//static bool isFireKeysBindsSet();
 
 	static void dbgLogHookArgsChanges(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, keyNum_t keyNum_a3, char isDown_a4);
 
 	static std::string debug_getFireKeysInfoStr();
 
-	static bool isButtonPressed(int usercmdButtonFlags, usercmdButton_t button);
+	//static bool isButtonPressed(int usercmdButtonFlags, usercmdButton_t button);
+
+	static void setButtonFlag(idPlayer* idPlayerPtr, usercmdButton_t button, bool isPressed);
+
+	static bool isButtonPressed(idPlayer* idPlayerPtr, usercmdButton_t button);
 
 	static void setButtonFlag(int& usercmdButtonFlags, usercmdButton_t button, bool isPressed);
 
 	static void invertZoomAndAttack(int& usercmdButtonFlags);
+
+	static void debugLog_JoystickCheckSmth_t_Hook(__int64 idUsercmdGenLocal_a1, unsigned __int64 a2, keyNum_t a3, float a4, float a5);
+
 
 	//static void sendFakeKeyPress(__int64 idUsercmdGenLocal_a1, keyNum_t keyNum, unsigned int a2, bool isKeyDown);
 
@@ -363,7 +371,7 @@ public:
 
 	static cmdGenButton_t getUseKeyGenButton();
 
-	static void updateCurrentUseBtnKeyNum();
+	//static void updateCurrentUseBtnKeyNum();
 
 	static Bind_K getKeyboardBind_K_ForAction(cmdGenButton_t cmd);
 

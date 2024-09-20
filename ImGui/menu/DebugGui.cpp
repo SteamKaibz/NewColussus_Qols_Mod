@@ -8,15 +8,32 @@ void DebugGui::showDebugWindow(bool* p_open)
         return;      
     }
 
-
     ImGuiDebugWin::ClearMessages();
 
     ImGuiDebugWin::AddMessage("DEBUG:");
     ImGuiDebugWin::AddMessage("_");
 
-    std::string buttonsStr = "usercmd_t=>buttons: ";
-    buttonsStr += K_Utils::intToHexString(idUsercmdGenLocalManager::DBG_Buttons);
-    ImGuiDebugWin::AddMessage(buttonsStr);
+
+    std::string GameStateStr = "GameState: ";    
+    std::string GameStateEnumStateStr = TypeInfoManager::getEnumMemberName("gameState_t", idGameLocalManager::getGameState());
+    GameStateStr += GameStateEnumStateStr;
+    ImGuiDebugWin::AddMessage(GameStateStr);
+
+    std::string isInScopeStr = "Is In Scope: ";
+    isInScopeStr += K_Utils::boolToStr(idPlayerManager::isInScope());
+    ImGuiDebugWin::AddMessage(isInScopeStr);
+
+    std::string isZoomBtnPressCheckActive = "isZoomBtnPressCheckActive: ";
+    isZoomBtnPressCheckActive += K_Utils::boolToStr(idUsercmdGenLocalManager::DBG_IsZoomBtnPressCheckActive);
+    ImGuiDebugWin::AddMessage(isZoomBtnPressCheckActive);
+
+    std::string tracker1buttonsStr = "ucmdTracker1 buttons: ";
+    tracker1buttonsStr += K_Utils::intToHexString(idUsercmdGenLocalManager::DBG_CmdTracker1_Buttons);
+    ImGuiDebugWin::AddMessage(tracker1buttonsStr);
+
+    std::string rawTrackerButtonsStr = "rawTracker buttons: ";
+    rawTrackerButtonsStr += K_Utils::intToHexString(idUsercmdGenLocalManager::DBG_RawCmdTracker_Buttons);
+    ImGuiDebugWin::AddMessage(rawTrackerButtonsStr);
 
     std::string lastKeyPressedStr = "last key pressed: ";
     std::string keyStr = idUsercmdGenLocalManager::debugGetLastA2InidKeyboardSmth_AE72A0Str();

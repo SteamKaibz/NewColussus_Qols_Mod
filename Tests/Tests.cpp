@@ -40,45 +40,7 @@ void Tests::PrintIdPlayerInfo() {
     if (MemHelper::isBadReadPtr(idplayer)) {
         logErr("PrintIdPlayerInfo: idplayer is bad ptr returning");
         return;
-    }
-    char* idplayerCharPtr = (char*)idplayer;
-    logInfo("idPlayer addr: %p", idplayerCharPtr);
-    logInfo("idPlayer::idPlayerConstant addr: %p", (idplayerCharPtr + 0x44B8));
-    logInfo("idPlayer::idPlayerEditable addr: %p", (idplayerCharPtr + 0x4B80));
-
-    char* idPlayerVolatile = idplayerCharPtr + 0x4EE0;
-    char* idPlayerVolatileUnsaved = idplayerCharPtr + 0x20380;
-    logInfo("idPlayer::idPlayerVolatile addr: %p", (idPlayerVolatile));
-    logInfo("idPlayer::idPlayerVolatile: controlledEntities addr: %p", (idPlayerVolatile + 0x9B78));
-
-    char* idHudInfo = idPlayerVolatile + 0x7718;
-    logInfo("idPlayer::idPlayerVolatile: idHudInfo addr: %p", (idHudInfo));
-    logInfo("idPlayer::idPlayerVolatile: idHudInfo: idHudWeaponAmmoStatusInfo addr: %p", (idHudInfo + 0x5E8));     
-    logInfo("idPlayer::idPlayerVolatile: idHudInfo: idHudReticleInfo addr: %p", (idHudInfo + 0x930));
-    logInfo("idPlayer::idPlayerVolatile: idHudInfo: idHudHealthIndicatorInfo addr: %p", (idHudInfo + 0x9A0));
-
-
-    char* coverModEnterDirV = idPlayerVolatile + 0x2468;
-    logInfo("coverModEnterDirV  addr: %p", coverModEnterDirV);
-
-    char* coverPoseAvoidanceBlend = idPlayerVolatile + 0x2510;
-    logInfo("coverPoseAvoidanceBlend  addr: %p", coverPoseAvoidanceBlend);
-
-
-
-    logInfo("idPlayer::idPlayerVolatile: idPlayerHud addr: %p", (idPlayerVolatile + 0x3BC0));
-    logInfo("idPlayer::idPlayerVolatile: zoomedIn addr: %p", (idPlayerVolatile + 0xD8 + 0x68));
-    logInfo("idPlayer::idPlayerVolatile: idEnvironmentAnalyzer addr: %p", (idPlayerVolatile + 0xB128));
-    logInfo("idPlayer::idPlayerVolatile: idHavokPhysics_Player addr: %p", (idPlayerVolatile + 0x9C88));
-    logInfo("idPlayer::idPlayerVolatile: localView_t localView: %p", (idPlayerVolatile + 0x87E0));
-   
-
-
-    logInfo("idPlayer::idPlayerVolatileUnsaved addr: %p", (idPlayerVolatileUnsaved));
-    logInfo("idPlayer::idPlayerVolatileUnsaved: idFocusTracker_Player addr: %p", (idPlayerVolatileUnsaved + 0x2A68));
-
-    logInfo("idEntity:playerController addr: %p", (idplayerCharPtr + 0x310));
-    logInfo("idEntity:midnightHandle addr: %p", (idplayerCharPtr + 0x848));
+    }   
 
 
     logInfo("");
@@ -103,10 +65,14 @@ void Tests::PrintIdPlayerInfo() {
     logInfo("");
 
     idEntity* entityPtr = (idEntity*)idplayer;
+    logInfo("&entityPtr->playerController: %p", entityPtr->playerController);
     logInfo("&entityPtr->playerController->ucmdTracker1: %p", &entityPtr->playerController->ucmdTracker1);
     logInfo("&entityPtr->playerController->ucmdTracker1.usercmd: %p", &entityPtr->playerController->ucmdTracker1.usercmd);
     logInfo("&entityPtr->playerController->ucmdTracker1.usercmd.buttons: %p", &entityPtr->playerController->ucmdTracker1.usercmd.buttons);
-    auto buttons = entityPtr->playerController->ucmdTracker1.usercmd.buttons;
+    logInfo("&entityPtr->playerController->ucmdTracker2: %p", &entityPtr->playerController->ucmdTracker2);
+    logInfo("&entityPtr->playerController->rawUCmdTracker: %p", &entityPtr->playerController->rawUCmdTracker);
+    logInfo("&entityPtr->playerController->rawUCmdTracker.usercmd: %p", &entityPtr->playerController->rawUCmdTracker.usercmd);
+   /* auto buttons = entityPtr->playerController->ucmdTracker1.usercmd.buttons;*/
 
 
    

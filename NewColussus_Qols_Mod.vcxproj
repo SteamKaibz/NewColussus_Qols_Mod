@@ -210,7 +210,6 @@
     <ClInclude Include="Json\nlohmann\json.hpp" />
     <ClInclude Include="Json\nlohmann\json_fwd.hpp" />
     <ClInclude Include="ModSettings\ModSettings.h" />
-    <ClInclude Include="Wolf2\SanityCheckManager.h" />
     <ClInclude Include="Wolf2\idConsoleLocalManager.h" />
     <ClInclude Include="Wolf2\idRenderModelGuiManager.h" />
     <ClInclude Include="Wolf2\ImGuiManager.h" />
@@ -334,7 +333,6 @@
     <ClCompile Include="Wolf2\autoItemPickUpManager.cpp" />
     <ClCompile Include="Debug\Debug.cpp" />
     <ClCompile Include="FileOp\FileOp.cpp" />
-    <ClCompile Include="Wolf2\SanityCheckManager.cpp" />
     <ClCompile Include="Wolf2\idConsoleLocalManager.cpp" />
     <ClCompile Include="Wolf2\idRenderModelGuiManager.cpp" />
     <ClCompile Include="Wolf2\ImGuiManager.cpp" />

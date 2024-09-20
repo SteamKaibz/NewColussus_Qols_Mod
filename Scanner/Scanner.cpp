@@ -24,7 +24,7 @@ bool Scanner::fastGetAddressesAndPatch() {
 	}
 
 	
-	if (!idGameLocalManager::acquireIdGameLocalPtr(MemHelper::getAddr(0x3C7CD40))){
+	if (!idGameLocalManager::acquireIdGameLocalPtP(MemHelper::getAddr(0x3C7CD40))){
 		logErr("failed for IdGameLocalPtr");
 		return false;
 	}
@@ -132,7 +132,7 @@ bool Scanner::scanForAddressesAndPatch()
 
 
 	const char idGameLocalPtrSig[] = "48 8B 05 ? ? ? ? 48 8B 08 48 8D 15 ? ? ? ? 4C 8B 41 48 48 3B CA 0F 85";
-	if (!idGameLocalManager::acquireIdGameLocalPtr(MemHelper::FindPtrFromRelativeOffset(((uintptr_t)MemHelper::ModulePatternScan( "GetidGameLocalPtr", idGameLocalPtrSig)), 3, 7))) {
+	if (!idGameLocalManager::acquireIdGameLocalPtP(MemHelper::FindPtrFromRelativeOffset(((uintptr_t)MemHelper::ModulePatternScan( "GetidGameLocalPtr", idGameLocalPtrSig)), 3, 7))) {
 		logErr("scanForAddressesAndPatch failed for idGameLocalPtrSig");
 		return false;
 	}

@@ -3,6 +3,7 @@
 #include "../MemHelper/MemHelper.h"
 #include "../MemHelper/Patcher.h"
 #include "../ModSettings/ModSettingsManager.h"
+#include "idUsercmdGenLocalManager.h"
 
 
 //#include "MemHelper/Patcher.h"
@@ -35,6 +36,8 @@ public:
 	static bool acquireZoomBtnReleaseInsctructionAddr(__int64 instructAddr);
 
 	static void checkZoomBtnState();
+
+	static void checkZoomBtnStateFromCmdTracker();
 
 	static void reset();
 

@@ -1,25 +1,6 @@
 #include "cachedCvarsManager.h"
 
-idCVar* cachedCvarsManager::m_windowWidthCached = nullptr;
-idCVar* cachedCvarsManager::m_windowHeightCached = nullptr;
-idCVar* cachedCvarsManager::m_win_hasFocusCached = nullptr;
-idCVar* cachedCvarsManager::m_swf_safeFrameCached = nullptr;
-idCVar* cachedCvarsManager::m_timescaleCached = nullptr;
-idCVar* cachedCvarsManager::m_swf_skipRenderText = nullptr;
-idCVar* cachedCvarsManager::m_pm_animCamAmount = nullptr;
-idCVar* cachedCvarsManager::m_sensitivity = nullptr;
 
- const float cachedCvarsManager::m_safeFrameValueMax = 0.93f;
- const float cachedCvarsManager::m_swf_safeFrameDefaultVal = 0.025f;
-
-
-//idCVar* cachedCvarsManager::m_gFovCached = nullptr;
-//idCVar* cachedCvarsManager::m_showDevMenuCached = nullptr;
-//idCVar* cachedCvarsManager::m_unlockMouseInMenusCached = nullptr;
-//idCVar* cachedCvarsManager::m_win_pauseOnAltTabCached = nullptr;
-//idCVar* cachedCvarsManager::m_testMaterialCached = nullptr;
-//idCVar* cachedCvarsManager::m_setTimeScaleCached = nullptr;
-//idCVar* cachedCvarsManager::m_showWorldMarkersCached = nullptr;
 
 
 
@@ -76,6 +57,25 @@ bool cachedCvarsManager::cacheCriticalCvars()
 		logErr("acquireCvarsPtrs: failed to find m_sensitivity");
 		return false;
 	}
+
+	m_win_pauseOnAltTab = (idCVar*)idCvarManager::getCvarPtr("win_pauseOnAltTab");
+	if (MemHelper::isBadReadPtr(m_win_pauseOnAltTab)) {
+		logErr("acquireCvarsPtrs: failed to find m_win_pauseOnAltTab");
+		return false;
+	}
+
+	m_r_mode = (idCVar*)idCvarManager::getCvarPtr("r_mode");
+	if (MemHelper::isBadReadPtr(m_r_mode)) {
+		logErr("acquireCvarsPtrs: failed to find m_r_mode");
+		return false;
+	}
+
+	m_r_fullscreen = (idCVar*)idCvarManager::getCvarPtr("r_fullscreen");
+	if (MemHelper::isBadReadPtr(m_r_fullscreen)) {
+		logErr("acquireCvarsPtrs: failed to find m_r_fullscreen");
+		return false;
+	}
+
 	/*else {
 		logInfo("cacheCriticalCvars: debug: m_sensitivity cvar: %p", m_sensitivity);
 	}*/
@@ -89,6 +89,8 @@ bool cachedCvarsManager::cacheCriticalCvars()
 
 	return true;
 }
+
+
 
 int cachedCvarsManager::get_WindowWidthInt() {	
 	if (m_windowWidthCached) {
@@ -190,7 +192,6 @@ float cachedCvarsManager::getTimescaleF() {
 }
 
 
-
 void cachedCvarsManager::skipRenderText(bool isSkipRenderText) {
 	if (m_swf_skipRenderText) {
 		m_swf_skipRenderText->valueInteger = (int)isSkipRenderText;
@@ -198,6 +199,25 @@ void cachedCvarsManager::skipRenderText(bool isSkipRenderText) {
 	}
 	logErr("skipRenderText: failed to find cvar, this is bad !");	
 }
+
+
+int cachedCvarsManager::get_r_mode() {
+	if (m_r_mode) {
+		return m_r_mode->valueInteger;
+	}
+	logErr("get_r_mode: nullptr. SOMETHING IS VERY WRONG MOD SHOULD NOT BE RUNNING");
+	return -1;
+}
+
+
+//! 0 = windowed, 1 = full screen, 2 = borderless window
+idPlayerProfileShell_displayMode_t cachedCvarsManager::getDisplayMode() {
+	if (m_r_fullscreen) {
+		return (idPlayerProfileShell_displayMode_t)m_r_fullscreen->valueInteger;
+	}
+	return DISPLAY_INVALID;
+}
+
 
 
 
@@ -242,6 +262,20 @@ void cachedCvarsManager::setAnimCamAmountProgressive(float animCamAmountF) {
 	}
 	logErr("setAnimCamAmountProgressive: failed to find cvar");
 }
+
+
+
+
+//? this doesn't work wtf?????
+//bool cachedCvarsManager::isWinPauseOnAltTab() {
+//	if (m_win_pauseOnAltTab) {
+//		return (bool) m_win_pauseOnAltTab->valueInteger;
+//	}
+//	logErr("isWinPauseOnAltTab: m_win_pauseOnAltTab is nullptr");
+//	return true;
+//}
+
+
 
 //void cachedCvarsManager::setAnimCamAmountProgressive(float animCamAmountF) {
 //	if (m_pm_animCamAmount) {

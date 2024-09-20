@@ -1133,11 +1133,25 @@ public:
 }; // size: 151344
 
 
+
 // idGameLocal : idGame
 class idGameLocal {
 public:
-	char pad_0[981296]; // offset: 0h (0d) size: 981296
+	char pad_0[856064]; // offset: 0h (0d) size: 856064
+	void* ImGui; // idImGui* imGUI; offset: D1000h (856064d)  size: 8
+	char pad_856072[7432]; // offset: D1008h (856072d) size: 7432
+	gameState_t gamestate; // offset: D2D10h (863504d)  size: 4
+	char pad_863508[24876]; // offset: D2D14h (863508d) size: 24876
+	challengeGameMode_t serializedChallengeMode; // offset: D8E40h (888384d)  size: 4
+	char pad_888388[7268]; // offset: D8E44h (888388d) size: 7268
+	gameState_t savedStateOnVideo; // offset: DAAA8h (895656d)  size: 4
+	char pad_895660[12]; // offset: DAAACh (895660d) size: 12
+	idManagedClassPtrBase bindVideo; // idManagedClassPtr < idEventReceiver > binkVideo; // offset: DAAB8h (895672d)  size: 32
+	char pad_895704[72480]; // offset: DAAD8h (895704d) size: 72480
+	void* itemSelectors[2];//idItemSelector* [2] itemSelectors; // offset: EC5F8h (968184d)  size: 16
+	char pad_968200[13096]; // offset: EC608h (968200d) size: 13096
 	idMetrics* gameMetrics; // offset: EF930h (981296d)  size: 8
-	char pad_End[475496]; // offset: EF938h (981304d) size: 475496
+	char pad_981304[475416]; // offset: EF938h (981304d) size: 475416
+	bool usingCheatCodes; // offset: 163A50h (1456720d)  size: 1
+	char pad_End[79]; // offset: 163A51h (1456721d) size: 79
 }; // size: 1456800
-

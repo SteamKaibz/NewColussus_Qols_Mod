@@ -127,9 +127,7 @@ void modInit() {
 	}
 
 
-
 	logInfo("modInit: waiting for MenuStateManager to initialize....");
-
 
 	idCmdManager::init();
 
@@ -137,8 +135,7 @@ void modInit() {
 
 	languageManager::LogGameLocalisation();
 
-
-	logInfo("modInit: Game Window Width: %d Heigth: %d", cachedCvarsManager::get_WindowWidthInt(), cachedCvarsManager::get_WindowHeightInt());
+	logInfo("modInit: %s", idRenderModelGuiManager::getDisplayDbgInfoStr().c_str());
 
 	while (MenuStateManager::get() == uninitialized || MenuStateManager::get() == undefined) {
 		Sleep(100);
@@ -147,8 +144,6 @@ void modInit() {
 
 	std::string gameVersionStr = BuildInfo::getBuildStr();
 	logInfo("Game build version: %s", gameVersionStr.c_str());
-
-
 
 }
 
@@ -339,6 +334,17 @@ bool InitializeHooksV2() {
 		return false;
 	}
 
+
+
+
+
+
+
+	/*p_JoystickCheckSmth_t_Target = reinterpret_cast<JoystickCheckSmth_t>(MemHelper::getFuncAddr(0xae5140)); 
+	if (MH_CreateHook(reinterpret_cast<void**>(p_JoystickCheckSmth_t_Target), &JoystickCheckSmth_t_Hook, reinterpret_cast<void**>(&p_JoystickCheckSmth_t)) != MH_OK) {
+		logErr("Failed to create JoystickCheckSmth_t hook.");
+		return false;
+	}*/
 
 	
 
@@ -535,7 +541,7 @@ DWORD WINAPI ModMain() {
 	uint64_t lastHighFpxFixCheckMs = 0;
 	uint64_t lastDwCheckMs = 0; //! dual wield
 	bool istryCacheGameFireKeysBindsFirstTime = true;;
-
+	gameState_t lastGameState = GAMESTATE_UNINITIALIZED;
 
 
 	while (true) {
@@ -554,7 +560,21 @@ DWORD WINAPI ModMain() {
 			continue;                     
 		}
 
+		gameState_t gameState = idGameLocalManager::getGameState();
+		if (gameState != lastGameState) {
+
+			std::string GameStateLastEnumStateStr = TypeInfoManager::getEnumMemberName("gameState_t", lastGameState);
+			std::string GameStateEnumStateStr = TypeInfoManager::getEnumMemberName("gameState_t", gameState);
+
+			logInfo("Main: gamestate has changed from: %s to %s", GameStateLastEnumStateStr.c_str(), GameStateEnumStateStr.c_str());
+
+			lastGameState = gameState;
+		}
 		
+		//! if the game is loading/unloading a map just wait 
+		if ((gameState != GAMESTATE_ACTIVE) && (gameState != GAMESTATE_NOMAP)) {
+			continue;
+		}
 
 		//! wait until game menu is initialized before imgui init
 		//? adding an extra static bool to force no ui and hopefully help issues with user who can not get a json file generated and as a result can not use the mod.
@@ -562,22 +582,27 @@ DWORD WINAPI ModMain() {
 			initImguiV2();         
 		}
 
-
+		//todo will the focus work if the option win_pauseOnAltTab  is on/off?
 		if (MenuStateManager::isNotMenu() && cachedCvarsManager::isWindowFocused()) {
 			
+			
+			//gameState_t gameState = idGameLocalManager::getGameState();
+			//logInfo("dbg: logging gamestate for crash study: %d", idGameLocalManager::getGameState());
 
-			ADS_Manager::checkZoomBtnState();
+			//! trying this version instead
+			ADS_Manager::checkZoomBtnStateFromCmdTracker();		
 
 		}	
 
-		//! one way to make sure the 'swap keys for dw' mod features is initialized
-		if (istryCacheGameFireKeysBindsFirstTime) {
+		//? 20/9/24 not needed anymore
+		////! one way to make sure the 'swap keys for dw' mod features is initialized
+		//if (istryCacheGameFireKeysBindsFirstTime) {
 
-			if (!idUsercmdGenLocalManager::isFireKeysBindsSet()) {
-				idUsercmdGenLocalManager::tryCacheGameFireKeysBinds();
-			}
-			istryCacheGameFireKeysBindsFirstTime = false;
-		}
+		//	if (!idUsercmdGenLocalManager::isFireKeysBindsSet()) {
+		//		idUsercmdGenLocalManager::tryCacheGameFireKeysBinds();
+		//	}
+		//	istryCacheGameFireKeysBindsFirstTime = false;
+		//}
 
 		//! 23/8/24 adding this to fix the player stuck on ledges at high framerate. we could potentially make this system trigger automatically but it will do for now.
 		if (K_Utils::EpochMillis() - lastHighFpxFixCheckMs > 50) {
@@ -586,7 +611,6 @@ DWORD WINAPI ModMain() {
 
 			lastHighFpxFixCheckMs = K_Utils::EpochMillis();
 		}
-
 
 		
 		
@@ -609,9 +633,9 @@ DWORD WINAPI ModMain() {
 				EnumsDefFileGenerator::DumpEnumDefs();
 				ClassDefFileGenerator::dumpClassDefs();
 
-				idEventManager::listAllEventsToFile();
+				/*idEventManager::listAllEventsToFile();
 				idEventManager::generateEventNumsEnumFile();
-				idEventManager::generateEventNumsEnumFileFor_0xcb58c0();
+				idEventManager::generateEventNumsEnumFileFor_0xcb58c0();*/
 
 				/*IdaScriptsGen gen;
 				gen.dumpIdaIdc();*/
@@ -670,19 +694,15 @@ DWORD WINAPI ModMain() {
 			if (GetAsyncKeyState(VK_NUMPAD5) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
 				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
 
-				idUsercmdGenLocalManager::getKeyboardBind_K_ForAction(UB_ATTACK1);
-				idUsercmdGenLocalManager::getKeyboardBind_K_ForAction(UB_ZOOM);
-
-				std::string keyNameStr = idUsercmdGenLocalManager::getKeyNameStrForKeyNum(K_MINUS);
-				logInfo("keyNameStr: %s", keyNameStr.c_str());
 
 
-				__int64 BtnInfoAddr = idUsercmdGenLocalManager::getBtnInfoFor(K_MOUSE2);
-				logInfo("BtnInfoAddr: %p", (void*)BtnInfoAddr);
+				idResourceList* resList = idResourceManager::getResourceListPtrForClsName("idDeclDevMenuList");
+				logInfo("resList: %p", resList);
 
-				//! keep findClassInfo:
-				//classTypeInfo_t* clsInfoPtr = TypeInfoManager::findClassInfo("idMenuScreen_Shell_Controls");
-				//logInfo("clsInfoPtr: %p", clsInfoPtr);		
+					//! keep findClassInfo:
+				classTypeInfo_t* clsInfoPtr = TypeInfoManager::findClassInfo("idMessageCallback");
+				logInfo("clsInfoPtr: %p", clsInfoPtr);			
+
 				
 
 			}

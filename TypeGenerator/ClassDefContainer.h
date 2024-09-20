@@ -3,6 +3,7 @@
 #include "ClassDef.h"
 
 
+//! the order of the members of cls do not matter cause  SortVarInfoVec(), which sorts by offset, that is done in the ctor 
 class ClassDefContainer {
 public:
     static std::vector<ClassDef>& getInstance() {
@@ -93,11 +94,9 @@ public:
 
             classDefsVec.push_back(ClassDef("idPlayerMetrics", { "stats", "killsThisLife", "kdr", "inGame", "weaponQueue", "levelStats" }));
 
-            classDefsVec.push_back(ClassDef("idMetrics", { "players", "gameEnded" }));
-
-            classDefsVec.push_back(ClassDef("idGameLocal", { "gameMetrics" }));
+            classDefsVec.push_back(ClassDef("idMetrics", { "players", "gameEnded" }));         
            
-                 
+            classDefsVec.push_back(ClassDef("idGameLocal", { "savedStateOnVideo", "imGUI", "binkVideo","itemSelectors", "usingCheatCodes", "serializedChallengeMode", "gamestate", "gameMetrics" }));  
            
 
             isInitialized = true;    

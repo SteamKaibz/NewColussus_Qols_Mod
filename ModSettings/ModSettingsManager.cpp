@@ -8,9 +8,9 @@ ModSettings ModSettingsManager::m_modSettings;
 
 void ModSettingsManager::updateCvars() {
 	logInfo("updating cvars... ");
-	if (Config::getConfig() != ModConfig::debug) {
+	/*if (Config::getConfig() != ModConfig::debug) {
 		idCmdManager::executeCmd("win_pauseOnAltTab 1");
-	}	
+	}*/
 
 	idCmdManager::executeCmd("view_showWorldMarkers 1");
 	idCmdManager::executeCmd("view_kickAmplitude_max", std::to_string(m_modSettings.viewKickMax));
@@ -21,6 +21,9 @@ void ModSettingsManager::updateCvars() {
 	idCmdManager::executeCmd("view_scoreScale", std::to_string(m_modSettings.isShowHudScoreDamageNumbers));
 	idCmdManager::executeCmd("player_analyzeEnvFreeLeanOnly", std::to_string(m_modSettings.isFreeLeanOnly));
 	idCmdManager::executeCmd("swf_safeFrame", std::to_string(m_modSettings.hudSafeFrameOffset));
+
+	logInfo("updateCvars: dbg: m_modSettings.isPauseGameOnAltTab: %d about to exe cmd...", m_modSettings.isPauseGameOnAltTab);
+	idCmdManager::executeCmd("win_pauseOnAltTab", std::to_string(m_modSettings.isPauseGameOnAltTab));
 }
 
 

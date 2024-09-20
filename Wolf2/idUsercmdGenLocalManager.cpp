@@ -99,40 +99,7 @@ keyNum_t idUsercmdGenLocalManager::getUseActionKeyNum() {
 	return K_JOY_X;
 }
 
-//! this should be called when user gets out of game menu => game or when he closes the console as these are the only times where he could change use key bind.
-void idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum() {
-    logInfo("updateCurrentUseBtnKeyNum() called");
-    auto newUseKeyNum = getUseActionKeyNum();
-    if (newUseKeyNum != m_current_use_keyNum) {
-        auto newUseKeyNumStr = getkeyNum_tAsStr(newUseKeyNum);
-        auto current_use_keyNumStr = getkeyNum_tAsStr(m_current_use_keyNum);
-        logWarn("updateCurrentUseBtnKeyNum: useKeyNum has changed from %s to %s", current_use_keyNumStr.c_str(), newUseKeyNumStr.c_str());
-        m_current_use_keyNum = newUseKeyNum;
-    }
-}
 
-
-void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMb_a2, bool isKeyDown)
-{
-    if (!m_sendKeyFuncAddr) {
-        //! result: matches @ 0xAE6FE0, sig direct: 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 48 8B 81 ? ? ? ? 8B F2 49 63 E8
-        m_sendKeyFuncAddr = MemHelper::getFuncAddr(0xAE6FE0);
-        if (MemHelper::isBadReadPtr((void*)m_sendKeyFuncAddr)) {
-            logErr("sendFakeUseKeyPressAndRelase: failed to find sendKeyFuncAddr, mod can not work.");
-            m_sendKeyFuncAddr = 0;
-            return;
-        }
-    }
-
-    if (m_current_use_keyNum == K_NONE) {
-        updateCurrentUseBtnKeyNum();
-    }
-
-    auto idUsercmdGenFunc = reinterpret_cast<idUsercmdGenLocalSmth_t>(m_sendKeyFuncAddr);
-    idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, m_current_use_keyNum, (char)isKeyDown);
-    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
-    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
-}
 
 
 
@@ -201,42 +168,107 @@ std::string idUsercmdGenLocalManager::getKeyNameStrForKeyNum(keyNum_t keyNum) {
 
 
 
-//! this should be triggered first time we are in game menus. and then each time leaving the game controls menu page.
-void idUsercmdGenLocalManager::tryCacheGameFireKeysBinds() {
-
-    m_attack1_UserBindK = getKeyboardBind_K_ForAction(UB_ATTACK1);
-    m_zoom_UserBindK = getKeyboardBind_K_ForAction(UB_ZOOM);
 
 
-    if (!(m_zoom_UserBindK.isBound()) || !(m_attack1_UserBindK.isBound())) {
-        logErr("tryCacheGameFireKeysBinds: For mouse and keyboard users: iron sight key and/or fire right weapon key is not bound, the feature to swap buttons when dual wielding will not work, please bind a key to 'fire right weapon' and 'iron sight/Fire left weapon' in the game menu (but do not bind them in the console please!)");
+bool idUsercmdGenLocalManager::isButtonPressed(idPlayer* idPlayerPtr, usercmdButton_t button) {
+  
+    idEntity* entity = (idEntity*)idPlayerPtr;
 
-        m_isFireKeysBindsSet = false;
-        return;
+    if (entity && entity->playerController) {          
+       
+        return (entity->playerController->rawUCmdTracker.usercmd.buttons & button) != 0;       
+    }
+
+    logWarn("isButtonPressed failed to find cmdTracker cause of null ptr");
+    return false;  
+}
+
+
+
+void idUsercmdGenLocalManager::setButtonFlag(int& usercmdButtonFlags, usercmdButton_t button, bool isPressed) {
+    if (isPressed) {
+        // Set the flag (turn the button on)
+        usercmdButtonFlags |= button;
     }
     else {
-        m_isFireKeysBindsSet = true;
+        // Clear the flag (turn the button off)
+        usercmdButtonFlags &= ~button;
     }
-   
+}
 
-    logInfo("tryCacheGameFireKeysBinds: just acquired/updated Bind_K for attack1 and zoom from game settings");
+void idUsercmdGenLocalManager::setButtonFlag(idPlayer* idPlayerPtr, usercmdButton_t button, bool isPressed) {
+    if (!idPlayerPtr) {
+        logErr("setButtonFlag: idPlayer is null");
+    }
+    else {
+        idEntity* entityPtr = (idEntity*)idPlayerPtr;
+        setButtonFlag(entityPtr->playerController->rawUCmdTracker.usercmd.buttons, button, isPressed);
+    }
+}
+
+
+void idUsercmdGenLocalManager::invertZoomAndAttack(int& usercmdButtonFlags) {
+    bool isZoomPressed = (usercmdButtonFlags & BUTTON_ZOOM) != 0;
+    bool isAttackPressed = (usercmdButtonFlags & BUTTON_ATTACK1) != 0;
+
+    // Swap the flags: if zoom was pressed, now attack is pressed and vice versa
+    if (isZoomPressed) {
+        usercmdButtonFlags &= ~BUTTON_ZOOM;      // Clear BUTTON_ZOOM
+        usercmdButtonFlags |= BUTTON_ATTACK1;    // Set BUTTON_ATTACK1
+    }
+    else {
+        usercmdButtonFlags &= ~BUTTON_ATTACK1;   // Clear BUTTON_ATTACK1
+    }
+
+    if (isAttackPressed) {
+        usercmdButtonFlags &= ~BUTTON_ATTACK1;   // Clear BUTTON_ATTACK1
+        usercmdButtonFlags |= BUTTON_ZOOM;       // Set BUTTON_ZOOM
+    }
+    else {
+        usercmdButtonFlags &= ~BUTTON_ZOOM;      // Clear BUTTON_ZOOM
+    }
 }
 
 
 
-bool idUsercmdGenLocalManager::isAttack1Key(keyNum_t keynum) {
-    return m_attack1_UserBindK.isBoundToKey(keynum);
+void idUsercmdGenLocalManager::debugLog_JoystickCheckSmth_t_Hook(__int64 idUsercmdGenLocal_a1, unsigned __int64 a2, keyNum_t a3, float a4, float a5) {
+
+    static __int64 prev_idUsercmdGenLocal_a1 = 0;
+    static unsigned __int64 prev_a2 = 0;
+    static keyNum_t prev_a3 = K_LAST_KEY;
+    static float prev_a4 = 0.0f;
+    static float prev_a5 = 0.0f;
+
+    if (idUsercmdGenLocal_a1 != prev_idUsercmdGenLocal_a1) {
+        logInfo("idUsercmdGenLocal_a1 changed: to: %p ", (void*)idUsercmdGenLocal_a1);
+        prev_idUsercmdGenLocal_a1 = idUsercmdGenLocal_a1;
+       
+        prev_a2 = 0;
+        keyNum_t prev_a3 = K_LAST_KEY;
+        prev_a4 = 0.0f;
+        prev_a5 = 0.0f;
+    }
+    if (a2 != prev_a2) {
+        logInfo("a2 (device number) changed to %llu ", a2);
+        prev_a2 = a2;
+    }
+    if (a3 != prev_a3) {
+        std::string prevkeyNumAsStr = getkeyNum_tAsStr(prev_a3);
+        std::string keyNumAsStr = getkeyNum_tAsStr(a3);
+        logInfo("keyNum_a3 has changed from %s to %s", prevkeyNumAsStr.c_str(), keyNumAsStr.c_str());       
+        prev_a3 = a3;
+    }
+    if (a4 != prev_a4) {
+        logInfo("a4 changed: to %.3f", a4);
+        prev_a4 = a4;
+    }
+    if (a5 != prev_a5) {
+        logInfo("a5 changed: to %.3f", a5);
+        prev_a5 = a5;
+    }
+
 }
 
-bool idUsercmdGenLocalManager::isZoomKey(keyNum_t keynum) {
-    return m_zoom_UserBindK.isBoundToKey(keynum);
-}
-
-
-bool idUsercmdGenLocalManager::isFireKeysBindsSet()
-{
-    return m_isFireKeysBindsSet;
-}
 
 
 
@@ -256,7 +288,7 @@ void idUsercmdGenLocalManager::dbgLogHookArgsChanges(__int64 idUsercmdGenLocal_a
         prev_deviceNumMB_a2 = UINT_MAX;;
         prev_isDown_a4 = -1;
     }
-    
+
     if (deviceNumMB_a2 != prev_deviceNumMB_a2) {
         logInfo("devicneNumMB_a2 has changed from %d to %d", prev_deviceNumMB_a2, deviceNumMB_a2);
         prev_deviceNumMB_a2 = deviceNumMB_a2;
@@ -287,7 +319,7 @@ std::string idUsercmdGenLocalManager::debug_getFireKeysInfoStr() {
         auto cmdGenBtn = getCmdGenButtonBoundTo((keyNum_t)keynum);
         if (cmdGenBtn == UB_ATTACK1) {
             std::string keyNumStr = getkeyNum_tAsStr((keyNum_t)keynum);
-            resultStr += " UB_ATTACK1 bound to " + keyNumStr;           
+            resultStr += " UB_ATTACK1 bound to " + keyNumStr;
         }
         else  if (cmdGenBtn == UB_ZOOM) {
             std::string keyNumStr = getkeyNum_tAsStr((keyNum_t)keynum);
@@ -313,50 +345,6 @@ std::string idUsercmdGenLocalManager::debug_getFireKeysInfoStr() {
 
 
 
-
-bool idUsercmdGenLocalManager::isButtonPressed(int usercmdButtonFlags, usercmdButton_t button) {
-    return (usercmdButtonFlags & button) != 0;
-}
-
-
-void idUsercmdGenLocalManager::setButtonFlag(int& usercmdButtonFlags, usercmdButton_t button, bool isPressed) {
-    if (isPressed) {
-        // Set the flag (turn the button on)
-        usercmdButtonFlags |= button;
-    }
-    else {
-        // Clear the flag (turn the button off)
-        usercmdButtonFlags &= ~button;
-    }
-}
-
-
-void idUsercmdGenLocalManager::invertZoomAndAttack(int& usercmdButtonFlags) {
-    bool isZoomPressed = (usercmdButtonFlags & BUTTON_ZOOM) != 0;
-    bool isAttackPressed = (usercmdButtonFlags & BUTTON_ATTACK1) != 0;
-
-    // Swap the flags: if zoom was pressed, now attack is pressed and vice versa
-    if (isZoomPressed) {
-        usercmdButtonFlags &= ~BUTTON_ZOOM;      // Clear BUTTON_ZOOM
-        usercmdButtonFlags |= BUTTON_ATTACK1;    // Set BUTTON_ATTACK1
-    }
-    else {
-        usercmdButtonFlags &= ~BUTTON_ATTACK1;   // Clear BUTTON_ATTACK1
-    }
-
-    if (isAttackPressed) {
-        usercmdButtonFlags &= ~BUTTON_ATTACK1;   // Clear BUTTON_ATTACK1
-        usercmdButtonFlags |= BUTTON_ZOOM;       // Set BUTTON_ZOOM
-    }
-    else {
-        usercmdButtonFlags &= ~BUTTON_ZOOM;      // Clear BUTTON_ZOOM
-    }
-}
-
-
-
-
-
 std::string idUsercmdGenLocalManager::debugGetLastA2InidKeyboardSmth_AE72A0Str() {
     return  std::to_string(m_lastA2In_idKeyboardSmth_AE72A0);
 }
@@ -370,6 +358,80 @@ void idUsercmdGenLocalManager::debugUpdate(unsigned int lastA2In_idKeyboardSmth_
     m_lastA2In_idKeyboardSmth_AE72A0 = lastA2In_idKeyboardSmth_AE72A0;
 }
 
+
+
+//? 20/9/24 we should not need this anymore as we use the cmdTracker.
+//! this should be called when user gets out of game menu => game or when he closes the console as these are the only times where he could change use key bind.
+//void idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum() {
+//    logInfo("updateCurrentUseBtnKeyNum() called");
+//    auto newUseKeyNum = getUseActionKeyNum();
+//    if (newUseKeyNum != m_current_use_keyNum) {
+//        auto newUseKeyNumStr = getkeyNum_tAsStr(newUseKeyNum);
+//        auto current_use_keyNumStr = getkeyNum_tAsStr(m_current_use_keyNum);
+//        logWarn("updateCurrentUseBtnKeyNum: useKeyNum has changed from %s to %s", current_use_keyNumStr.c_str(), newUseKeyNumStr.c_str());
+//        m_current_use_keyNum = newUseKeyNum;
+//    }
+//}
+
+//? 20/9/24 we should not need this anymore as we use cmdTracker
+//void idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMb_a2, bool isKeyDown)
+//{
+//    if (!m_sendKeyFuncAddr) {
+//        //! result: matches @ 0xAE6FE0, sig direct: 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 48 8B 81 ? ? ? ? 8B F2 49 63 E8
+//        m_sendKeyFuncAddr = MemHelper::getFuncAddr(0xAE6FE0);
+//        if (MemHelper::isBadReadPtr((void*)m_sendKeyFuncAddr)) {
+//            logErr("sendFakeUseKeyPressAndRelase: failed to find sendKeyFuncAddr, mod can not work.");
+//            m_sendKeyFuncAddr = 0;
+//            return;
+//        }
+//    }
+//
+//    if (m_current_use_keyNum == K_NONE) {
+//        updateCurrentUseBtnKeyNum();
+//    }
+//
+//    auto idUsercmdGenFunc = reinterpret_cast<idUsercmdGenLocalSmth_t>(m_sendKeyFuncAddr);
+//    idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, m_current_use_keyNum, (char)isKeyDown);
+//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, K_JOY_X, (char)isKeyDown); //?  this will work even if there is not controller connected 
+//    //idUsercmdGenFunc(idUsercmdGenLocal_a1, devicneNumMb_a2, 0x21, (char)isKeyDown); //? 0x21 for F key 
+//}
+
+//? 20/9/24 not using this anymore as we use cmdTracker
+//! this should be triggered first time we are in game menus. and then each time leaving the game controls menu page.
+//void idUsercmdGenLocalManager::tryCacheGameFireKeysBinds() {
+//
+//    m_attack1_UserBindK = getKeyboardBind_K_ForAction(UB_ATTACK1);
+//    m_zoom_UserBindK = getKeyboardBind_K_ForAction(UB_ZOOM);
+//
+//
+//    if (!(m_zoom_UserBindK.isBound()) || !(m_attack1_UserBindK.isBound())) {
+//        logErr("tryCacheGameFireKeysBinds: For mouse and keyboard users: iron sight key and/or fire right weapon key is not bound, the feature to swap buttons when dual wielding will not work, please bind a key to 'fire right weapon' and 'iron sight/Fire left weapon' in the game menu (but do not bind them in the console please!)");
+//
+//        m_isFireKeysBindsSet = false;
+//        return;
+//    }
+//    else {
+//        m_isFireKeysBindsSet = true;
+//    }
+//   
+//
+//    logInfo("tryCacheGameFireKeysBinds: just acquired/updated Bind_K for attack1 and zoom from game settings");
+//}
+
+
+
+
+
+
+//bool idUsercmdGenLocalManager::isFireKeysBindsSet()
+//{
+//    return m_isFireKeysBindsSet;
+//}
+
+
+//bool idUsercmdGenLocalManager::isButtonPressed(int usercmdButtonFlags, usercmdButton_t button) {
+//    return (usercmdButtonFlags & button) != 0;
+//}
 
 //void idUsercmdGenLocalManager::sendFakeKeyPress(__int64 idUsercmdGenLocal_a1, keyNum_t keyNum, unsigned int devicneNumMb_a2, bool isKeyDown)
 //{

@@ -1,14 +1,8 @@
 #include "customDotCrosshairManager.h"
 
 
-bool customDotCrosshairManager::m_debugLastIsGameActive = false;
 
- CustomDotCrosshair customDotCrosshairManager::m_crosshair;
 
-int customDotCrosshairManager::m_cachedScreenWidth = 0;
-int customDotCrosshairManager::m_cachedScreenHeight = 0;
-
-bool customDotCrosshairManager::m_wasUserInModSettings = true; //! true cause it will trigger at least once whe game starts.
 
 
 void customDotCrosshairManager::setUserInModSettings() {
@@ -70,12 +64,22 @@ void customDotCrosshairManager::updateFromModSettings() {
 
 bool customDotCrosshairManager::isResolutionChanged()
 {
-    if ((cachedCvarsManager::get_WindowWidthInt() != m_cachedScreenWidth) || (cachedCvarsManager::get_WindowHeightInt() != m_cachedScreenHeight)) {
+    if (cachedCvarsManager::get_r_mode() != m_last_r_mode || cachedCvarsManager::getDisplayMode() != m_lastDisplayMode) {
+
+        logInfo("Resolution has changed: %s", idRenderModelGuiManager::getDisplayDbgInfoStr().c_str());
+
+        m_last_r_mode = cachedCvarsManager::get_r_mode();
+        m_lastDisplayMode = cachedCvarsManager::getDisplayMode();
+
+        return true;
+    }
+
+  /*  if ((cachedCvarsManager::get_WindowWidthInt() != m_cachedScreenWidth) || (cachedCvarsManager::get_WindowHeightInt() != m_cachedScreenHeight)) {
         m_cachedScreenWidth = cachedCvarsManager::get_WindowWidthInt();
         m_cachedScreenHeight = cachedCvarsManager::get_WindowHeightInt();
         logInfo("isResolutionChanged: resolution has changed, width: %.d heigth: %.d", m_cachedScreenWidth, m_cachedScreenHeight);
         return true;
-    }
+    }*/
     return false;    
 }
 

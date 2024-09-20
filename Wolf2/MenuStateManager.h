@@ -45,7 +45,8 @@ public:
 
 	static bool isRenderModNameFlag();
 
-	//static gameState_t get();
+	//static gameState_t getGameState();
+
 
 	//static std::string getGameStateToString();
 

@@ -112,6 +112,8 @@ public:
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("idPlayerHud::hudState_t"));
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("gameStat_t"));
         enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("equipSlot_t"));
+        enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("challengeGameMode_t"));
+        enumTypesInfoVec.push_back(TypeInfoManager::FindEnumInfo("idPlayerProfileShell::displayMode_t"));
 
 
         for (size_t i = 0; i < enumTypesInfoVec.size(); i++)

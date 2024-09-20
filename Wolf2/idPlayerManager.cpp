@@ -115,6 +115,16 @@ bool idPlayerManager::isDualWielding(idPlayer* idplayerPtr) {
 }
 
 
+bool idPlayerManager::isInScope() {
+	idPlayer* idplayerPtr = idGameLocalManager::getIdPlayer();
+	if (idplayerPtr) {
+		return idplayerPtr->playerVolatile.hudInfo.inScope;
+	}
+
+	return false;
+}
+
+
 
 std::string idPlayerManager::getAnimSysEventsDgbStrForImgui() {
 

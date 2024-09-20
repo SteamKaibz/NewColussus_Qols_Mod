@@ -183,6 +183,8 @@ void ModSettings::initializeMembers() {
     isSilentAna = false;
     isSilentGrace = false;
 
+    isPauseGameOnAltTab = true;
+
     isModLoadBeep = false;
     isLogGameConsoleToLogFile = false;
     isUseImgui = true;

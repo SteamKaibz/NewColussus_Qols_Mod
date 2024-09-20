@@ -5,6 +5,7 @@
 #include "idColor.h"
 #include "../Config/Config.h"
 #include "../MemHelper/MemHelper.h"
+#include "cachedCvarsManager.h"
 
 
 class idRenderModelGuiManager
@@ -47,6 +48,8 @@ public:
 	static bool isWhiteMaterialacquired();
 
 	static void acquireWhiteMaterial();
+
+	static std::string getDisplayDbgInfoStr();
 
 	//static void drawStretchPic(__int64 guiPtr_a1, float x_a2, float y_a3, float z_a4, float w_a5, float h_a6, float s1_a7, float t1_a8, float s2_a9, float t2_a10, __int64 mtr_a11);
 };

@@ -36,6 +36,8 @@ public:
 	static bool isDualWielding();
 	static bool isDualWielding(idPlayer* idplayerPtr);
 
+	static bool isInScope();
+
 	//static bool isDualWielding();
 
 	static std::string getAnimSysEventsDgbStrForImgui();	

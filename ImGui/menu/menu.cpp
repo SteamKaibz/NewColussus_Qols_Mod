@@ -311,6 +311,7 @@ namespace Menu {
                 modSettings.isSilentAna = j.value("isSilentAna", false);
                 modSettings.isSilentGrace = j.value("isSilentGrace", false);
 
+                modSettings.isPauseGameOnAltTab = j.value("isPauseGameOnAltTab", true);
 
                 modSettings.isModLoadBeep = j.value("isModLoadBeep", false);
                 modSettings.isLogGameConsoleToLogFile = j.value("isLogGameConsoleToLogFile", false);
@@ -445,6 +446,7 @@ namespace Menu {
         j["isSilentAna"] = modSettings.isSilentAna;
         j["isSilentGrace"] = modSettings.isSilentGrace;
 
+        j["isPauseGameOnAltTab"] = modSettings.isPauseGameOnAltTab;
 
         j["isModLoadBeep"] = modSettings.isModLoadBeep;
         j["isLogGameConsoleToLogFile"] = modSettings.isLogGameConsoleToLogFile;
@@ -725,7 +727,6 @@ namespace Menu {
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));    
 
         ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-
 
 
         if (ImGui::BeginTabBar("Tabs")) {
@@ -1158,7 +1159,7 @@ namespace Menu {
                     ImGui::NewLine();                   
 
 
-                    ImGui::SliderFloat("Hud Offset", &Menu::modSettings.hudSafeFrameOffset, 0.01f, cachedCvarsManager::m_safeFrameValueMax);
+                    ImGui::SliderFloat("Hud Offset", &Menu::modSettings.hudSafeFrameOffset, 0.01f, cachedCvarsManager::SafeFrameValueMax);
                     ImGui::SameLine();
                     if (ImGui::Button("RESET")) {
                         Menu::modSettings.hudSafeFrameOffset = modSettingsConst::safeFrameDefaultVal;
@@ -1453,26 +1454,30 @@ namespace Menu {
                 ImGui::NewLine();
 
 
-                ImGui::Checkbox("Swap Keybinds When Dual Wielding", &Menu::modSettings.isSwapBindsWhenDualWielding);
-                insertToolTipSameLine("Checked: For example, if you have bound zoom to right mouse button \nand fire to left mouse button, this feature will invert\n those binds when dual wielding so in that case, \nmouse right will fire right weapon and mouse left will fire left weapon \nUnchecked: Default game behaviour");
-                ImGui::SameLine();
-                ImGui::TextColored(orangeColor, " (Not Recommended for Controller Users !)");
+                ImGui::Checkbox("Swap Fire Binds When Dual Wielding", &Menu::modSettings.isSwapBindsWhenDualWielding);
+                insertToolTipSameLine("Checked: For example, if you have bound zoom to right mouse button \nand fire to left mouse button, this feature will invert\n those binds when dual wielding so in that case, \nmouse right will fire right weapon and mouse left will fire left weapon\nThis is not recomended for controllers as it's already set correctly\nUnchecked: Default game behaviour");
+                if (Menu::modSettings.isSwapBindsWhenDualWielding) {
+                    ImGui::SameLine();
+                    ImGui::TextColored(orangeColor, " (Not Recommended for Controller Users !)");
+                }              
 
 
                 ImGui::NewLine();    
                 ImGui::NewLine();  
 
-
-                if (Menu::modSettings.isAdsToggle) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, yellowColor);
-                    ImGui::Text("DON T FORGET TO SET THE ZOOM KEY BELOW IF YOU ENABLE THIS");
-                    ImGui::PopStyleColor();     
-                }
-                ImGui::Checkbox("ADS Key Toggle", &Menu::modSettings.isAdsToggle);
-                insertToolTipSameLine("Makes the zoom key a toggle. DON T FORGET TO SET THE ZOOM KEY BELOW IF YOU ENABLE THIS");
+              
+                ImGui::Checkbox("ADS Toggle", &Menu::modSettings.isAdsToggle);
+                insertToolTipSameLine("Checked: Makes the zoom key/button a toggle.\nUnchecked: Default Game Behaviour");
 
 
-                float comboAlpha = Menu::modSettings.isAdsToggle ? 1.0f : 0.4f;
+               /* ImGui::NewLine();
+                ImGui::NewLine();
+
+                // this doesn't work
+                ImGui::Checkbox("Pause The Game On Alt Tab", &Menu::modSettings.isPauseGameOnAltTab);
+                insertToolTipSameLine("Checked: Default Game Behaviour\nUnchecked: The game will NOT automatically go to the game menu when you alt tab");*/
+
+               /* float comboAlpha = Menu::modSettings.isAdsToggle ? 1.0f : 0.4f;
 
                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, comboAlpha);
 
@@ -1495,7 +1500,7 @@ namespace Menu {
                     }
 
                     ImGui::EndCombo();
-                }
+                }*/
 
                 ImGui::PopStyleVar(); 
 

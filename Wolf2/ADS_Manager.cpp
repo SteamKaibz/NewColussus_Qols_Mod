@@ -22,9 +22,8 @@ bool ADS_Manager::acquireZoomBtnReleaseInsctructionAddr(__int64 instructAddr) {
 //
 //}
 
+//! 20/9/24 this should not be used anymore we have a much better way not that gets state from kbm and controllers.
 void ADS_Manager::checkZoomBtnState() {
-	//static bool isZoomBtnReleasedFlag = false;
-
 	
 	//! is btn pressed
 	//if ((GetAsyncKeyState(VK_RBUTTON) & 0x8001)) { 
@@ -39,6 +38,42 @@ void ADS_Manager::checkZoomBtnState() {
 		m_isZoomBtnReleasedFlag = true;
 	}
 }
+
+
+void ADS_Manager::checkZoomBtnStateFromCmdTracker() {	
+
+	idPlayer* idplayerPtr = idGameLocalManager::getIdPlayer();
+	if (idUsercmdGenLocalManager::isButtonPressed(idplayerPtr, BUTTON_ZOOM)) {
+		if (m_isZoomBtnReleasedFlag) {
+			ADS_Manager::raiseToggleFlag();
+			m_isZoomBtnReleasedFlag = false;
+		}
+	}
+	else { //! if btn released
+		m_isZoomBtnReleasedFlag = true;
+	}
+
+
+	//idPlayer* idplayerPtr = idGameLocalManager::getIdPlayer();
+	//if (idplayerPtr) {
+
+	//	idEntity* entity = (idEntity*)idplayerPtr;
+	//	if (idUsercmdGenLocalManager::isButtonPressed(entity->playerController->rawUCmdTracker.usercmd.buttons, BUTTON_ZOOM)) {
+
+	//		if (m_isZoomBtnReleasedFlag) {
+	//			ADS_Manager::raiseToggleFlag();
+	//			m_isZoomBtnReleasedFlag = false;
+	//		}
+
+	//	}
+	//	else { //! if btn released
+	//		m_isZoomBtnReleasedFlag = true;
+	//	}
+	//}
+}
+
+
+
 
 void ADS_Manager::reset() {
 	m_isZoomInTrigger = false;

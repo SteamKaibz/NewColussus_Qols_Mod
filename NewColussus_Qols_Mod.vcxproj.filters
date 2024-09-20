@@ -87,7 +87,6 @@
     <ClInclude Include="Wolf2\idRenderModelGuiManager.h" />
     <ClInclude Include="Wolf2\idConsoleLocalManager.h" />
     <ClInclude Include="Wolf2\idMaterialManager.h" />
-    <ClInclude Include="Wolf2\SanityCheckManager.h" />
     <ClInclude Include="ModSettings\ModSettings.h" />
     <ClInclude Include="Json\nlohmann\json.hpp" />
     <ClInclude Include="Json\nlohmann\json_fwd.hpp" />
@@ -187,7 +186,6 @@
     <ClCompile Include="Wolf2\idRenderModelGuiManager.cpp" />
     <ClCompile Include="Wolf2\idConsoleLocalManager.cpp" />
     <ClCompile Include="Wolf2\idMaterialManager.cpp" />
-    <ClCompile Include="Wolf2\SanityCheckManager.cpp" />
     <ClCompile Include="FileOp\FileOp.cpp" />
     <ClCompile Include="Wolf2\autoItemPickUpManager.cpp" />
     <ClCompile Include="Wolf2\customDotCrosshairManager.cpp" />

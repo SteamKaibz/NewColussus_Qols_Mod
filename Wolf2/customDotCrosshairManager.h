@@ -6,7 +6,7 @@
 #include "cachedCvarsManager.h"
 #include "idEngineLocalManager.h"
 #include "../ModSettings/ModSettingsManager.h"
-
+#include "idRenderModelGuiManager.h"
 
 
 
@@ -29,14 +29,18 @@ class customDotCrosshairManager
 
 private:
 
-    static bool m_debugLastIsGameActive;
+    static inline bool m_debugLastIsGameActive = false;;
 
-    static CustomDotCrosshair m_crosshair;
+    static inline CustomDotCrosshair m_crosshair;
 
-    static int m_cachedScreenWidth;
-    static int m_cachedScreenHeight;
+    static inline int m_cachedScreenWidth = 0;
+    static inline int m_cachedScreenHeight = 0;
+    
+    static inline int m_last_r_mode = -1;
+    static inline idPlayerProfileShell_displayMode_t m_lastDisplayMode = DISPLAY_INVALID;
 
-    static bool m_wasUserInModSettings;
+    static inline bool m_wasUserInModSettings = true; //! init to true cause it will trigger at least once whe game starts.
+
 
 
 public:

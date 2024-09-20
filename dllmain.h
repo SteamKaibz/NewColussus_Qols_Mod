@@ -294,11 +294,12 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 
 		}
 
-		if (lastMenuIndex == SHELL_SCREEN_CONTROLS) {
+		//? 20/9/24 not needed anymore as we use cmdTracker to get inputs
+		/*if (lastMenuIndex == SHELL_SCREEN_CONTROLS) {
 			logInfo("shell hook: getting out of controls screen: updating cached bound keys...");
 			idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum();
 			idUsercmdGenLocalManager::tryCacheGameFireKeysBinds();
-		}
+		}*/
 
 		std::string lastMenuStr = MenuStateManager::shellScreenToString(lastMenuIndex);
 		std::string currMenuStr = MenuStateManager::shellScreenToString(currentMenuIndex);
@@ -339,14 +340,14 @@ goingFromMainMenuToInGame_t p_GoingFromMainMenuToInGame_Target = nullptr;
 
 __int64 __fastcall goingFromMainMenuToInGame_Hook(__int64 a1) {
 
-	static int lastFullScreenState = -1;
+	//static int lastFullScreenState = -1;
 
-	int fullscreenState = idCvarManager::getCvarInt("r_fullscreen");
+	/*int fullscreenState = idCvarManager::getCvarInt("r_fullscreen");
 
 	if (fullscreenState != lastFullScreenState) {
 		logInfo("fullscreenState has changed from: %d to %d", lastFullScreenState, fullscreenState);
 		lastFullScreenState = fullscreenState;
-	}
+	}*/
 
 	idLightManager::updateHeadLight();
 	
@@ -367,9 +368,8 @@ closeIdConsoleSmth_A8D1E0_t p_closeIdConsoleSmth_A8D1E0_Target = nullptr;
 
 __int16 __fastcall closeIdConsoleSmth_A8D1E0_Hook(__int64 a1, char a2) {
 	
-	logInfo("console is closing, checking for potential use keybind change...");
-	idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum();
-	//todo not sure if we should check for fire keys binds change here...i can see the state issues coming....
+	logInfo("console is closing...");
+	//idUsercmdGenLocalManager::updateCurrentUseBtnKeyNum();	
 
 	idCmdManager::setCriticalCvars();
 
@@ -813,13 +813,10 @@ typedef void(__fastcall* idKeyboardSmth_t)(__int64 a1, unsigned int a2);
 idKeyboardSmth_t p_idKeyboardSmth_t = nullptr;
 idKeyboardSmth_t p_idKeyboardSmth_t_Target = nullptr;
 
-void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a2) {
+void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a2) {		
 
-
-	//idUsercmdGenLocalManager::debugUpdate(a2);
-
-	
-	static uint64_t lastFakeKeyPressMs = 0;
+	//todo 20/9/24 try replacing this with the new cmdTracker methods	
+	/*static uint64_t lastFakeKeyPressMs = 0;
 	static uint64_t lastFakeZoomKeyPressMs = 0;
 
 	if (K_Utils::EpochMillis() - lastFakeKeyPressMs > 350) {
@@ -827,7 +824,6 @@ void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a
 		if (autoItemPickUpManager::isUseKeyAutoPressFlag()) {
 
 			logInfo("idKeyboardSmth_Hook triggering use key press n release");
-
 			
 			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, true);
 			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, false);
@@ -836,8 +832,7 @@ void __fastcall idKeyboardSmth_Hook(__int64 idUsercmdGenLocal_a1, unsigned int a
 
 			autoItemPickUpManager::setUseKeyAutoPressFlag(false);
 		}
-	}	
-
+	}	*/
 
 	return p_idKeyboardSmth_t(idUsercmdGenLocal_a1, a2);
 }
@@ -856,8 +851,35 @@ char __fastcall idPlayer_UseCheck_Hook(idPlayer* idPlayer_a1, __int64* gameTime_
 
 	static uint64_t lastLightStartXAdjustMs = 0;
 
-	idPlayerManager::handleChange(idPlayer_a1);
+	/*idEntity* entity = (idEntity*)idPlayer_a1;	
+	idUsercmdGenLocalManager::DBG_RawCmdTracker_Buttons = entity->playerController->rawUCmdTracker.usercmd.buttons;*/
 
+
+	static uint64_t lastFakeKeyPressMs = 0;
+	static uint64_t lastFakeZoomKeyPressMs = 0;
+
+	if (K_Utils::EpochMillis() - lastFakeKeyPressMs > 350) {
+
+		if (autoItemPickUpManager::isUseKeyAutoPressFlag()) {
+
+			logInfo("idPlayer_UseCheck_Hook: triggering use key press n release");
+
+			idUsercmdGenLocalManager::setButtonFlag(idPlayer_a1, BUTTON_USE, true);
+			//idUsercmdGenLocalManager::setButtonFlag(idPlayer_a1, BUTTON_USE, false);
+
+			/*idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, true);
+			idUsercmdGenLocalManager::sendFakeUseKeyPressAndRelase(idUsercmdGenLocal_a1, a2, false);*/
+
+			lastFakeKeyPressMs = K_Utils::EpochMillis();
+
+			autoItemPickUpManager::setUseKeyAutoPressFlag(false);
+		}
+	}
+
+
+
+
+	idPlayerManager::handleChange(idPlayer_a1);
 
 	idFocusTrackerManager::acquirecrosshairInfoDataForDebug(idPlayer_a1);		
 
@@ -884,7 +906,7 @@ char __fastcall idPlayer_UseCheck_Hook(idPlayer* idPlayer_a1, __int64* gameTime_
 
 
 
-
+//! this is a way to know which keyboard key has been pressed, however you will not get the analog inputs from a controller using this, this means you will not know if trigger 1 or 2 is pressed unfortunately.
 //! __int64 __fastcall idUsercmdGenLocal_SendKeySmth_AE6FE0(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, unsigned int keyNum_a3, char isDown_a4)
 typedef __int64(__fastcall* idUsercmdGenLocal_SendKeySmth_t)(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, keyNum_t keyNum_a3, char isDown_a4);
 idUsercmdGenLocal_SendKeySmth_t p_SendKeySmth_t = nullptr;
@@ -892,7 +914,7 @@ idUsercmdGenLocal_SendKeySmth_t p_SendKeySmth_t_Target = nullptr;
 
 __int64 __fastcall SendKeySmth_t_Hook(__int64 idUsercmdGenLocal_a1, unsigned int devicneNumMB_a2, keyNum_t keyNum_a3, char isDown_a4) {	
 
-	idUsercmdGenLocalManager::dbgLogHookArgsChanges(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
+	//idUsercmdGenLocalManager::dbgLogHookArgsChanges(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
 
 
 	/*if (!ModSettingsManager::isSwapBindsWhenDualWielding()) {
@@ -915,9 +937,6 @@ __int64 __fastcall SendKeySmth_t_Hook(__int64 idUsercmdGenLocal_a1, unsigned int
 		
 	return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
 }
-
-
-
 
 
 
@@ -951,49 +970,18 @@ void __cdecl IdLib_PrintfHook_1238530(const char* format, ...) {
 
 
 
-
 typedef char(__fastcall* idPlayerHandleZoomSmth_t)(idPlayer* idPlayer_a1, char a2, __int64 a3);
 idPlayerHandleZoomSmth_t p_idPlayerHandleZoomSmth = nullptr;
 idPlayerHandleZoomSmth_t p_idPlayerHandleZoomSmth_Target = nullptr;
 
-char __fastcall idPlayerHandleZoomSmth_Hook(idPlayer* idPlayer_a1, char a2, __int64 a3) {
-	
-	idEntity* entity = (idEntity*)idPlayer_a1;
-	idUsercmdGenLocalManager::DBG_Buttons = entity->playerController->ucmdTracker1.usercmd.buttons;
-
-	//! this works !
-	//idUsercmdGenLocalManager::setButtonFlag(entity->playerController->ucmdTracker1.usercmd.buttons, BUTTON_ZOOM, true);
+char __fastcall idPlayerHandleZoomSmth_Hook(idPlayer* idPlayer_a1, char a2, __int64 a3) {	
 
 	if (ModSettingsManager::isSwapBindsWhenDualWielding() && idPlayerManager::isDualWielding(idPlayer_a1)) {
-
+		idEntity* entity = (idEntity*)idPlayer_a1;
 		idUsercmdGenLocalManager::invertZoomAndAttack(entity->playerController->ucmdTracker1.usercmd.buttons);
 	}
 
-	/*idUsercmdGenLocalManager::invertZoomAndAttack(entity->playerController->ucmdTracker1.usercmd.buttons);
-
-
-	if (!ModSettingsManager::isSwapBindsWhenDualWielding()) {
-		return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
-	}
-
-	if (!idUsercmdGenLocalManager::isFireKeysBindsSet()) {
-		logErr("FireKeys are not set, dual wielding key swap mod feature can not work, please bind keys to fire and zoom keys");
-		return p_SendKeySmth_t(idUsercmdGenLocal_a1, devicneNumMB_a2, keyNum_a3, isDown_a4);
-	}
-
-	if (idPlayerManager::isDualWielding()) {
-		if (idUsercmdGenLocalManager::isAttack1Key(keyNum_a3)) {
-			keyNum_a3 = K_JOY_TRIGGER1;
-		}
-		else if (idUsercmdGenLocalManager::isZoomKey(keyNum_a3)) {
-			keyNum_a3 = K_JOY_TRIGGER2;
-		}
-	}*/
-
-
-
-
-
+	//? 20/9/24 commenting this for alt testing
 	if (!ModSettingsManager::isAdsToggleEnabled()) {
 		if (ADS_Manager::getPatchState() != zoomCodeOriginal) {
 			ADS_Manager::restoreZoomBtnReleaseCheck();
@@ -1003,12 +991,73 @@ char __fastcall idPlayerHandleZoomSmth_Hook(idPlayer* idPlayer_a1, char a2, __in
 
 		//! if zoom key has bee pressed
 		if (ADS_Manager::isToggleFlag() && idPlayer_a1) {
-			ADS_Manager::Toggle(idPlayer_a1->playerVolatile.hudInfo.inScope);     
+			//! this will patch the code
+			ADS_Manager::Toggle(idPlayer_a1->playerVolatile.hudInfo.inScope);
 		}
 	}
 	return p_idPlayerHandleZoomSmth(idPlayer_a1, a2, a3);
 
+
+	/*idEntity* entity = (idEntity*)idPlayer_a1;
+	idUsercmdGenLocalManager::DBG_CmdTracker1_Buttons = entity->playerController->ucmdTracker1.usercmd.buttons;
+
+	static bool lastisZoomBtnPressed = false;
+
+	bool isZoomBtnPressed = idUsercmdGenLocalManager::isButtonPressed(entity->playerController->rawUCmdTracker.usercmd.buttons, BUTTON_ZOOM);
+
+	if (isZoomBtnPressed != lastisZoomBtnPressed) {
+
+		idUsercmdGenLocalManager::DBG_IsZoomBtnPressCheckActive = true;
+		ADS_Manager::Toggle(idPlayer_a1->playerVolatile.hudInfo.inScope);
+
+
+		lastisZoomBtnPressed = isZoomBtnPressed;
+	}
+	else {
+		idUsercmdGenLocalManager::DBG_IsZoomBtnPressCheckActive = false;
+	}*/
+
+
+
+	//if (idUsercmdGenLocalManager::DBG_IsZoomBtnReleasedFlag && idUsercmdGenLocalManager::isButtonPressed(entity->playerController->rawUCmdTracker.usercmd.buttons, BUTTON_ZOOM)) {
+	//	idUsercmdGenLocalManager::DBG_IsZoomBtnReleasedFlag = false;
+	//}
+	//else { //! if btn released
+	//	idUsercmdGenLocalManager::DBG_IsZoomBtnReleasedFlag = true;
+	//}
+	
+
+	/*static bool isToggleActive = false;
+
+
+	idEntity* entity = (idEntity*)idPlayer_a1;
+	idUsercmdGenLocalManager::DBG_CmdTracker1_Buttons = entity->playerController->ucmdTracker1.usercmd.buttons;
+
+	if (isToggleActive) {
+		if (idUsercmdGenLocalManager::isButtonPressed(entity->playerController->rawUCmdTracker.usercmd.buttons, BUTTON_ZOOM)) {
+			isToggleActive = false;
+		}
+	}
+	else {
+		if (idUsercmdGenLocalManager::isButtonPressed(entity->playerController->rawUCmdTracker.usercmd.buttons, BUTTON_ZOOM)) {
+			isToggleActive = true;
+		}
+	}
+
+
+	if (isToggleActive) {
+		idUsercmdGenLocalManager::setButtonFlag(entity->playerController->ucmdTracker1.usercmd.buttons, BUTTON_ZOOM, true);
+	}*/
+
+
+
+	//? forcing this for debug make sure to remove it when done !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! this works !
+	//idUsercmdGenLocalManager::setButtonFlag(entity->playerController->ucmdTracker1.usercmd.buttons, BUTTON_ZOOM, true);
+	
+
 }
+
 
 
 
@@ -1030,6 +1079,38 @@ char __fastcall levelLoadCompleted_Hook() {
 	weaponsManager::updateDeclWeapons();
 
 	return p_levelLoadCompleted();
+}
+
+
+
+WNDPROC pOriginalWndProc = nullptr;
+
+LRESULT CALLBACK HookedWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+	if (MenuStateManager::isNotMenu() && !idConsoleLocalManager::isConsoleOpened() && cachedCvarsManager::isWindowFocused()) {
+		if (uMsg == WM_KEYDOWN) {
+			if (wParam == ModSettingsManager::getNormalSpeedKeyCode()) {
+				logInfo("HookedWndProc: user pressing reset game speed key");
+				timescaleManager::resetSpeed();
+			}
+			else if (wParam == ModSettingsManager::getFastForwardKeyCode()) {
+				logInfo("HookedWndProc: user pressing fast forward game speed key");
+				timescaleManager::increaseSpeed();
+			}
+			else if (wParam == ModSettingsManager::getFlashLightKeyCode()) {
+				if (idLightManager::shouldFlashLightBeOff()) {
+					logWarn("preventing user from changing flashlight state to prevent screen glare");
+				}
+				else {
+					idLightManager::toggleHeadLight();
+				}
+			}
+			else if (wParam == ModSettingsManager::getHighFrameMvtFixKeyVkCode()) {
+				idPlayerManager::triggerHighFramerateMvtFix();
+			}
+		}
+	}
+	return CallWindowProc(pOriginalWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 
@@ -1104,37 +1185,24 @@ char __fastcall levelLoadCompleted_Hook() {
 //}
 
 
+//? this func triggers all the time and keyNum will be K_JOY_TRIGGER1 and then K_JOY_TRIGGER2 the actual input don't matter so this is not really what we're looking for
+//! RVA: 0xae5140 void __fastcall idUsercmdGenLocal_JoystickCheckSmth(__int64 idUsercmdGenLocal_a1, unsigned __int64 a2, keyNum_t* a3, float a4, float a5)
+//typedef void(__fastcall* JoystickCheckSmth_t)(__int64 idUsercmdGenLocal_a1, unsigned __int64 a2, keyNum_t a3, float a4, float a5);
+//JoystickCheckSmth_t p_JoystickCheckSmth_t = nullptr;
+//JoystickCheckSmth_t p_JoystickCheckSmth_t_Target = nullptr;
+//
+//void __fastcall JoystickCheckSmth_t_Hook(__int64 idUsercmdGenLocal_a1, unsigned __int64 a2, keyNum_t a3, float a4, float a5) {
+//	
+//	idUsercmdGenLocalManager::debugLog_JoystickCheckSmth_t_Hook(idUsercmdGenLocal_a1, a2, a3, a4, a5);
+//
+//
+//	p_JoystickCheckSmth_t(idUsercmdGenLocal_a1, a2, a3, a4, a5);
+//}
 
 
-WNDPROC pOriginalWndProc = nullptr;
 
-LRESULT CALLBACK HookedWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
-	if (MenuStateManager::isNotMenu() && !idConsoleLocalManager::isConsoleOpened() && cachedCvarsManager::isWindowFocused()) {
-		if (uMsg == WM_KEYDOWN) {
-			if (wParam == ModSettingsManager::getNormalSpeedKeyCode()) {
-				logInfo("HookedWndProc: user pressing reset game speed key");
-				timescaleManager::resetSpeed();
-			}
-			else if (wParam == ModSettingsManager::getFastForwardKeyCode()) {
-				logInfo("HookedWndProc: user pressing fast forward game speed key");
-				timescaleManager::increaseSpeed();
-			}
-			else if (wParam == ModSettingsManager::getFlashLightKeyCode()) {
-				if (idLightManager::shouldFlashLightBeOff()) {
-					logWarn("preventing user from changing flashlight state to prevent screen glare");
-				}
-				else {
-					idLightManager::toggleHeadLight();
-				}
-			}
-			else if (wParam == ModSettingsManager::getHighFrameMvtFixKeyVkCode()) {
-				idPlayerManager::triggerHighFramerateMvtFix();
-			}
-		}
-	}
-	return CallWindowProc(pOriginalWndProc, hwnd, uMsg, wParam, lParam);
-}
+
 
 
 

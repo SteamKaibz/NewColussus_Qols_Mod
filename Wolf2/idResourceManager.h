@@ -30,7 +30,7 @@ private:
 
 	static idResourceList__ForClassName_ABBE60 m_getResListForClsNameFp;
 
-	static idResourceList* getResourceListPtrForClsName(std::string clsName);
+	
 
 	static const __int64 m_labelsListStartOffset;
 
@@ -42,6 +42,8 @@ private:
 
 
 public:
+
+	static idResourceList* getResourceListPtrForClsName(std::string clsName);
 
 	//? damn templates.
 	/*template <typename T>

@@ -11,20 +11,44 @@
 class cachedCvarsManager
 {
 private:
-	static idCVar* m_windowWidthCached;
-	static idCVar* m_windowHeightCached;
-	//! this is used to prevent keypress from triggering key press actions when user alt tabs
-	static idCVar* m_win_hasFocusCached;
-	static idCVar* m_swf_safeFrameCached;
-	static idCVar* m_timescaleCached;
-	static idCVar* m_swf_skipRenderText;
-	static idCVar* m_pm_animCamAmount;
-	static idCVar* m_sensitivity; // 
 
-	static const float m_swf_safeFrameDefaultVal; //! because use in imgui
+	static inline idCVar* m_windowWidthCached = nullptr;
+	static inline idCVar* m_windowHeightCached = nullptr;
+	static inline idCVar* m_win_hasFocusCached = nullptr;
+	static inline idCVar* m_swf_safeFrameCached = nullptr;
+	static inline idCVar* m_timescaleCached = nullptr;
+	static inline idCVar* m_swf_skipRenderText = nullptr;
+	static inline idCVar* m_pm_animCamAmount = nullptr;
+	static inline idCVar* m_sensitivity = nullptr;
+	static inline idCVar* m_win_pauseOnAltTab = nullptr;
+	static inline idCVar* m_r_mode = nullptr;
+	static inline idCVar* m_r_fullscreen = nullptr;
+
+
+
+	static inline const float m_safeFrameValueMax = 0.93f;
+	static inline const float m_swf_safeFrameDefaultVal = 0.025f;
 
 	//! finding good enough value through trial and error
 	static const inline float m_headbobResetIncrements = 0.02f;
+
+
+
+
+	//static idCVar* m_windowWidthCached;
+	//static idCVar* m_windowHeightCached;
+	////! this is used to prevent keypress from triggering key press actions when user alt tabs
+	//static idCVar* m_win_hasFocusCached;
+	//static idCVar* m_swf_safeFrameCached;
+	//static idCVar* m_timescaleCached;
+	//static idCVar* m_swf_skipRenderText;
+	//static idCVar* m_pm_animCamAmount;
+	//static idCVar* m_sensitivity; // 
+	//static idCVar* m_win_pauseOnAltTabCached;
+
+	//static const float m_swf_safeFrameDefaultVal; //! because use in imgui
+
+
 
 
 	//static idCVar* m_showDevMenuCached;
@@ -38,7 +62,7 @@ private:
 public :
 
 
-	static const float m_safeFrameValueMax;
+	static inline const float SafeFrameValueMax = 0.93f;
 
 	static bool cacheCriticalCvars();
 
@@ -63,6 +87,12 @@ public :
 	static float getTimescaleF();
 
 	static void skipRenderText(bool isSkipRenderText);
+
+	static int get_r_mode();
+
+	static idPlayerProfileShell_displayMode_t getDisplayMode();
+
+	//static bool isWinPauseOnAltTab();
 
 	static void setAnimCamAmountProgressive(float animCamAmountF);
 

@@ -80,6 +80,21 @@ void idRenderModelGuiManager::acquireWhiteMaterial() {
 	logInfo("acquireWhiteMaterial: m_whiteMaterial set to: %p", (void*)m_whiteMaterial);
 }
 
+std::string idRenderModelGuiManager::getDisplayDbgInfoStr()
+{
+	std::string resultStr;
+	resultStr += "Resulution Info: Display mode: ";
+	//? reminder: enum name is different here...
+	resultStr += TypeInfoManager::getEnumMemberName("idPlayerProfileShell::displayMode_t", cachedCvarsManager::getDisplayMode());
+	resultStr += " r_mode: ";
+	resultStr += std::to_string(cachedCvarsManager::get_r_mode());
+	resultStr += " Width: ";
+	resultStr += std::to_string(cachedCvarsManager::get_WindowWidthInt());
+	resultStr += " Height: ";
+	resultStr += std::to_string(cachedCvarsManager::get_WindowHeightInt());
+	return resultStr;
+}
+
 bool idRenderModelGuiManager::acquireWhiteMaterialAddr(__int64 _whiteMtr)
 {
 	if (MemHelper::isBadReadPtr((void*)_whiteMtr)) {

@@ -98,8 +98,7 @@ public:
     float lasergewehrAdsFovSensMultiplier;
 
     float ubergewehrAdsFov;
-    float ubergewehrAdsFovSensMultiplier;
-       
+    float ubergewehrAdsFovSensMultiplier;       
 
 
     bool isUseCustomHud;
@@ -139,6 +138,8 @@ public:
     bool isAdsToggle;
     unsigned int zoomKeyVkCode;          
     bool isSwapBindsWhenDualWielding;
+
+    bool isPauseGameOnAltTab;
 
     bool isFreeLeanOnly;
     float headBobAmount;

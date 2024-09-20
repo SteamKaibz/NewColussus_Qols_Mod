@@ -176,6 +176,38 @@ bool MenuStateManager::isRenderModNameFlag()
 }
 
 
+
+
+
+
+//gameState_t MenuStateManager::getGameState()
+//{
+//	
+//
+//}
+
+
+//gameState_t GameStateManager::get()
+//{
+//	__int64 idGameLocalPtr = MemHelper::getAddr(0x3C7CD40);
+//	if (MemHelper::isBadReadPtr((void*)idGameLocalPtr)) {
+//		logErr("update: idGameLocalPtr is bad ptr returning GAMESTATE_UNINITIALIZED");
+//		return gameState_t::GAMESTATE_UNINITIALIZED;
+//	}
+//	//logInfo("update: idGameLocalPtr: %p", (void*)idGameLocalPtr);
+//
+//	__int64 idGameLocal = *(__int64*)idGameLocalPtr;
+//	if (MemHelper::isBadReadPtr((void*)idGameLocal) || MemHelper::isBadReadPtr((void*)(idGameLocal + 0xD2D10))) {
+//		logErr("update: idGameLocal is bad ptr returning GAMESTATE_UNINITIALIZED");
+//		return gameState_t::GAMESTATE_UNINITIALIZED;
+//	}
+//	return *(gameState_t*)(idGameLocal + 0xD2D10);
+//
+//}
+//
+// 
+// 
+// 
 //void MenuStateManager::setState(__int64 idMenuManager_Shell_PtrAddr, int idMenuManager_currentScreen)
 //{
 //
@@ -203,26 +235,6 @@ bool MenuStateManager::isRenderModNameFlag()
 //
 //	m_menuState = menuState;
 //}
-
-
-//gameState_t GameStateManager::get()
-//{
-//	__int64 idGameLocalPtr = MemHelper::getAddr(0x3C7CD40);
-//	if (MemHelper::isBadReadPtr((void*)idGameLocalPtr)) {
-//		logErr("update: idGameLocalPtr is bad ptr returning GAMESTATE_UNINITIALIZED");
-//		return gameState_t::GAMESTATE_UNINITIALIZED;
-//	}
-//	//logInfo("update: idGameLocalPtr: %p", (void*)idGameLocalPtr);
-//
-//	__int64 idGameLocal = *(__int64*)idGameLocalPtr;
-//	if (MemHelper::isBadReadPtr((void*)idGameLocal) || MemHelper::isBadReadPtr((void*)(idGameLocal + 0xD2D10))) {
-//		logErr("update: idGameLocal is bad ptr returning GAMESTATE_UNINITIALIZED");
-//		return gameState_t::GAMESTATE_UNINITIALIZED;
-//	}
-//	return *(gameState_t*)(idGameLocal + 0xD2D10);
-//
-//}
-//
 //
 //std::string GameStateManager::getGameStateToString() {
 //
