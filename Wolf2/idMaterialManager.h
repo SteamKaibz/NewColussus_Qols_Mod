@@ -49,7 +49,7 @@ class idMaterialManager
 private:
 	static const __int64 m_idMaterialResourceListOffset;
 	static std::string m_idMaterialResourceListTypeName;
-	static int m_testIndex;
+	//static int m_testIndex;
 
     //! priority materials list
     //static std::vector<std::string> m_spotligtShadowCastingFallOffMaterialsStrsVec;

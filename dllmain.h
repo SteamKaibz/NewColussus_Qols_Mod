@@ -314,6 +314,37 @@ char __fastcall idMenuManager_Shell_Update_Hook(__int64 idMenuManager_Shell_a1, 
 
 
 
+//! RVA: 0x528310
+//typedef __int64(__fastcall* DrawString_t)(
+//	void* idRenderModelGui_a1,
+//	float a2,
+//	float a3,
+//	unsigned __int8* charPtr_a4,
+//	__int64 a5,
+//	char a6,
+//	float a7);
+//
+//
+//DrawString_t p_DrawString_t = nullptr;
+//DrawString_t p_DrawString_t_Target = nullptr;
+//
+//
+//__int64 __fastcall DrawString_t_Hook(
+//	void* idRenderModelGui_a1,
+//	float a2,
+//	float a3,
+//	unsigned __int8* charPtr_a4,
+//	__int64 a5,
+//	char a6,
+//	float a7) {
+//
+//
+//
+//	// Call the original function
+//	return p_DrawString_t(idRenderModelGui_a1, a2, a3, charPtr_a4, a5, a6, a7);
+//}
+
+
 
 
 typedef void(__fastcall* drawChar_MB_5280B0_t)(__int64 a1, float a2, float a3, unsigned int a4, float a5);

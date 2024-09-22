@@ -5,7 +5,7 @@ __int64 const idMaterialManager::m_idMaterialResourceListOffset = 0x3C767F0;
 std::string idMaterialManager::m_idMaterialResourceListTypeName("material");
 //int idMaterialManager::m_testIndex = -1;
 //? don't forget m_testIndex might not be -1
-int idMaterialManager::m_testIndex = 250;
+//int idMaterialManager::m_testIndex = 250;
 
  //std::vector<std::string> m_spotligtShadowCastingFallOffMaterialsStrsVec {""}
 
@@ -98,7 +98,6 @@ __int64 idMaterialManager::getCurrentMapSpotLightMaterialPtr() {
 //	logErr("getCurrentMapHeadLightMaterialPtr failed to find %s returning 0", ligthMtrName.c_str());
 //}
 
-
 void idMaterialManager::debugGetLightMaterialVec() {
 	int counter = 0;
 
@@ -156,10 +155,12 @@ idList* idMaterialManager::getMaterialsIdList() {
 	return  (idList*)idMaterialResourceList_IdListPtr;
 }
 
+
+//! this will use the g_testMaterial cmd to show things, meaning they will only show while in game not in menus.
 void idMaterialManager::showMaterial(int index, idList* idListPtr) {
 	auto firstMaterialPtr = idListPtr->list; //! addr of first materialPtr in the list
 	logInfo("showMaterial: firstMaterialPtr %p", firstMaterialPtr);
-	auto materialPtr = m_testIndex * 8 + (char*)firstMaterialPtr;
+	auto materialPtr = index * 8 + (char*)firstMaterialPtr;
 	logInfo("showMaterial: materialPtr %p", materialPtr);
 	if (MemHelper::isBadReadPtr(materialPtr)) {
 		logErr("showMaterial: materialPtr bad ptr: %p", materialPtr);
@@ -171,13 +172,14 @@ void idMaterialManager::showMaterial(int index, idList* idListPtr) {
 	const char* materialName = *(const char**)(material + 8);
 	//std::string matrName = materialName;
 	//std::string g_testMaterialStr = "g_testMaterial " + matrName;
-	logInfo("showMaterial: material: %p materialName addr: %p matrName: %s index is: %d", (void*)material, materialName, materialName, m_testIndex);
+	logInfo("showMaterial: material: %p materialName addr: %p matrName: %s index is: %d", (void*)material, materialName, materialName, index);
 	if (materialName) {
-		idCmdManager::executeCmd("g_testMaterial", materialName);
-		//idCvarManager::setCvar("g_testMaterial", materialName);
+		idCmdManager::executeCmd("g_testMaterial", materialName);		
 	}
 }
 
+
+//! this will use the g_testMaterial cmd to show things, meaning they will only show while in game not in menus.
 void idMaterialManager::showMaterialStartingWith(int index, idList* idListPtr, std::string filterStr) {
 	auto firstMaterialPtr = idListPtr->list; //! addr of first materialPtr in the list
 	//logInfo("showMaterialStartingWith: firstMaterialPtr %p", firstMaterialPtr);
@@ -206,13 +208,8 @@ void idMaterialManager::showMaterialStartingWith(int index, idList* idListPtr, s
 			idCmdManager::executeCmd("g_testMaterial", materialName);
 			//idCvarManager::setCvar("g_testMaterial", materialName);
 		}
-	}
-
-
-
-	
+	}	
 }
-
 
 
 
@@ -244,50 +241,53 @@ void idMaterialManager::autoShowMaterialStartingWith(std::string matrName) {
 
 
 
-void idMaterialManager::testMaterialNext()
-{
 
-	auto materialIdList = getMaterialsIdList();
-	if (MemHelper::isBadReadPtr(materialIdList)) {
-		logErr("testMaterialNext: materialIdList bad ptr: %p", materialIdList);
-		return;
-	}
 
-	 m_testIndex++;
-	 if (m_testIndex < 0) {
-		 logWarn("testMaterialNext: m_testIndex is negative, setting index to 0");
-		 m_testIndex = 0;
-	 }
-	 if (m_testIndex >= materialIdList->num) {
-		 logWarn("testMaterialNext: max materials index reached (num = %d and index = %d) setting index to 0", materialIdList->num, m_testIndex);
-		 m_testIndex = 0;
-	 }
-	 showMaterial(m_testIndex, materialIdList);
 
-  }
-
-  void idMaterialManager::testMaterialPrev()
-  {
-	  auto materialIdList = getMaterialsIdList();
-	  if (MemHelper::isBadReadPtr(materialIdList)) {
-		  logErr("testMaterialPrev: materialIdList bad ptr: %p", materialIdList);
-		  return;
-	  }
-
-	  m_testIndex--;
-	  if (m_testIndex < 0) {
-		  if (materialIdList->num == 0) {
-			  m_testIndex = 0;
-		  }
-		  else {
-			  m_testIndex = materialIdList->num - 1;
-		  }	 		  
-		  logWarn("testMaterialPrev: m_testIndex is negative, setting index to %d", m_testIndex);
-	  }
-	  if (m_testIndex >= materialIdList->num) {		 
-		  logWarn("testMaterialPrev: max materials index reached (num = %d and index = %d) setting index to 0", materialIdList->num, m_testIndex);
-		  m_testIndex = 0;
-		  
-	  }
-	  showMaterial(m_testIndex, materialIdList);
-  }
+//! this works but we can do better. using imgui or smth.
+//void idMaterialManager::testMaterialNext()
+//{
+//	auto materialIdList = getMaterialsIdList();
+//	if (MemHelper::isBadReadPtr(materialIdList)) {
+//		logErr("testMaterialNext: materialIdList bad ptr: %p", materialIdList);
+//		return;
+//	}
+//
+//	 m_testIndex++;
+//	 if (m_testIndex < 0) {
+//		 logWarn("testMaterialNext: m_testIndex is negative, setting index to 0");
+//		 m_testIndex = 0;
+//	 }
+//	 if (m_testIndex >= materialIdList->num) {
+//		 logWarn("testMaterialNext: max materials index reached (num = %d and index = %d) setting index to 0", materialIdList->num, m_testIndex);
+//		 m_testIndex = 0;
+//	 }
+//	 showMaterial(m_testIndex, materialIdList);
+//
+//  }
+//
+//  void idMaterialManager::testMaterialPrev()
+//  {
+//	  auto materialIdList = getMaterialsIdList();
+//	  if (MemHelper::isBadReadPtr(materialIdList)) {
+//		  logErr("testMaterialPrev: materialIdList bad ptr: %p", materialIdList);
+//		  return;
+//	  }
+//
+//	  m_testIndex--;
+//	  if (m_testIndex < 0) {
+//		  if (materialIdList->num == 0) {
+//			  m_testIndex = 0;
+//		  }
+//		  else {
+//			  m_testIndex = materialIdList->num - 1;
+//		  }	 		  
+//		  logWarn("testMaterialPrev: m_testIndex is negative, setting index to %d", m_testIndex);
+//	  }
+//	  if (m_testIndex >= materialIdList->num) {		 
+//		  logWarn("testMaterialPrev: max materials index reached (num = %d and index = %d) setting index to 0", materialIdList->num, m_testIndex);
+//		  m_testIndex = 0;
+//		  
+//	  }
+//	  showMaterial(m_testIndex, materialIdList);
+//  }
