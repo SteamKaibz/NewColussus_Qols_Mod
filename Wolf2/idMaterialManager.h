@@ -69,7 +69,11 @@ public:
 
 	static void showMaterial(int index, idList* idListPtr);
 
-	static void testMaterialNext();
+    static void showMaterialStartingWith(int index, idList* idListPtr, std::string filterStr);
+
+    static void autoShowMaterialStartingWith(std::string matrName);
+
+    static void testMaterialNext();
 	static void testMaterialPrev();
 
 

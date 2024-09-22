@@ -539,9 +539,13 @@ DWORD WINAPI ModMain() {
 	uint64_t lastdebugUseSystemPrintMs = 0;
 	uint64_t lastIniFileWatcherCheckMs = 0;
 	uint64_t lastHighFpxFixCheckMs = 0;
-	uint64_t lastDwCheckMs = 0; //! dual wield
+	uint64_t lastDwCheckMs = 0; //! dual wield	
 	bool istryCacheGameFireKeysBindsFirstTime = true;;
+	
 	gameState_t lastGameState = GAMESTATE_UNINITIALIZED;
+
+	uint64_t lastAutoMaterialTestMs = 0;
+	bool isAutoMaterialTest = false;
 
 
 	while (true) {
@@ -593,6 +597,17 @@ DWORD WINAPI ModMain() {
 			ADS_Manager::checkZoomBtnStateFromCmdTracker();		
 
 		}	
+
+		if (K_Utils::EpochMillis() - lastAutoMaterialTestMs > 100) {
+
+
+			idMaterialManager::autoShowMaterialStartingWith("textures/guis/extra");
+
+
+			lastAutoMaterialTestMs = K_Utils::EpochMillis();
+		}
+
+		
 
 		//? 20/9/24 not needed anymore
 		////! one way to make sure the 'swap keys for dw' mod features is initialized
@@ -696,14 +711,32 @@ DWORD WINAPI ModMain() {
 
 
 
-				idResourceList* resList = idResourceManager::getResourceListPtrForClsName("idDeclDevMenuList");
+				//idResourceList* resList = idResourceManager::getResourceListPtrForClsName("idDeclDevMenuList");
+				idResourceList* resList = idResourceManager::getResourceListPtrForClsName("idMaterial");
 				logInfo("resList: %p", resList);
 
 					//! keep findClassInfo:
-				classTypeInfo_t* clsInfoPtr = TypeInfoManager::findClassInfo("idMessageCallback");
-				logInfo("clsInfoPtr: %p", clsInfoPtr);			
+				//classTypeInfo_t* clsInfoPtr = TypeInfoManager::findClassInfo("idMessageCallback");
+				//logInfo("clsInfoPtr: %p", clsInfoPtr);			
 
 				
+
+			}
+
+			if (GetAsyncKeyState(VK_NUMPAD7) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
+				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
+
+				isAutoMaterialTest = !isAutoMaterialTest;
+				logInfo("VK_NUMPAD7: isAutoMaterialTest: %d", isAutoMaterialTest);
+
+				//idMaterialManager::testMaterialPrev();
+
+			}
+
+			if (GetAsyncKeyState(VK_NUMPAD9) && ((K_Utils::EpochMillis() - g_lastGetAsyncKeyPress) > 300)) {
+				g_lastGetAsyncKeyPress = K_Utils::EpochMillis();
+
+				//idMaterialManager::testMaterialNext();
 
 			}
 

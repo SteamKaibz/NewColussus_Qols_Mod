@@ -166,7 +166,7 @@ void idMaterialManager::showMaterial(int index, idList* idListPtr) {
 		return;
 	}
 	__int64 material = *(__int64*)materialPtr;
-	logInfo("showMaterial: material %p", (void*)material);
+	//logInfo("showMaterial: material %p", (void*)material);
 
 	const char* materialName = *(const char**)(material + 8);
 	//std::string matrName = materialName;
@@ -177,6 +177,71 @@ void idMaterialManager::showMaterial(int index, idList* idListPtr) {
 		//idCvarManager::setCvar("g_testMaterial", materialName);
 	}
 }
+
+void idMaterialManager::showMaterialStartingWith(int index, idList* idListPtr, std::string filterStr) {
+	auto firstMaterialPtr = idListPtr->list; //! addr of first materialPtr in the list
+	//logInfo("showMaterialStartingWith: firstMaterialPtr %p", firstMaterialPtr);
+	auto materialPtr = index * 8 + (char*)firstMaterialPtr;
+	//logInfo("showMaterialStartingWith: materialPtr %p", materialPtr);
+	if (MemHelper::isBadReadPtr(materialPtr)) {
+		logErr("showMaterialStartingWith: materialPtr bad ptr: %p", materialPtr);
+		return;
+	}
+	__int64 material = *(__int64*)materialPtr;
+	//logInfo("showMaterial: material %p", (void*)material);
+
+	const char* materialName = *(const char**)(material + 8);
+	std::string materailNameStr = materialName;
+
+
+	//logInfo("showMaterialStartingWith: DBG:  matrName: %s  materailNameStr.c_str(): %s index is: %d", materialName, materailNameStr.c_str(), index);
+
+	//! it works it's just that you have to wait until you actually find smth...
+	if ((materailNameStr.starts_with(filterStr))) {
+	
+		//logWarn("showMaterialStartingWith: found match !!!");
+
+		logInfo("showMaterialStartingWith: material: %p materialName addr: %p matrName: %s index is: %d", (void*)material, materialName, materialName, index);
+		if (materialName) {
+			idCmdManager::executeCmd("g_testMaterial", materialName);
+			//idCvarManager::setCvar("g_testMaterial", materialName);
+		}
+	}
+
+
+
+	
+}
+
+
+
+
+//! use this in main for ex, to show all the materials starting with this name, keep in mind you need to be in game, atm, to see anything, it will not work in the menu.
+void idMaterialManager::autoShowMaterialStartingWith(std::string matrName) {
+
+	static int index = 0;
+
+	auto materialIdList = getMaterialsIdList();
+	if (MemHelper::isBadReadPtr(materialIdList)) {
+		logErr("autoShowMaterialStartingWith: materialIdList bad ptr: %p", materialIdList);
+		return;
+	}
+	
+	if (materialIdList->num <= 0) {
+		logErr("autoShowMaterialStartingWith: materialIdList->num <= 0 returning ");
+		return;
+	}
+	
+	if (index >= materialIdList->num) {
+		logWarn("testMaterialNext: max materials index reached (num = %d and index = %d) setting index to 0", materialIdList->num, index);
+		index = 0;
+	}
+	showMaterialStartingWith(index, materialIdList, matrName);
+
+	index++;
+}
+
+
 
 
 void idMaterialManager::testMaterialNext()
