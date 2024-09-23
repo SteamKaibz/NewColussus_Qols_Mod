@@ -601,7 +601,8 @@ DWORD WINAPI ModMain() {
 		if (K_Utils::EpochMillis() - lastAutoMaterialTestMs > 100) {
 
 
-			idMaterialManager::autoShowMaterialStartingWith("textures/guis/extra");
+			//? disabling for now cause working on smth else but this is useful:
+			//idMaterialManager::autoShowMaterialStartingWith("textures/guis/extra");
 
 
 			lastAutoMaterialTestMs = K_Utils::EpochMillis();

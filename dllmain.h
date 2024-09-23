@@ -513,7 +513,7 @@ __int64 __fastcall getLocalisedStrAddrMB_Hook(__int64 struct_a1, char* string_a2
 
 
 
-
+//! RVA: 0x874cd0
 typedef void(__fastcall* swf_RenderEditTex_t)(
 	__int64 idSWF_a1,
 	__int64 idRenderModelGui_a2,
@@ -595,7 +595,7 @@ void __fastcall swf_RenderEditTex_Hook(
 
 		//! changing the str_menu_root_dev_label
 		else if (MenuStateManager::isRenderModNameFlag() && (textInst->text.data && languageManager::getLocalizedDevStr() && strcmp(textInst->text.data, languageManager::getLocalizedDevStr()) == 0)) {
-			logInfo("debug main menu: swf_RenderEditTex_Hook: textInst->text.len: %d textInst->text add: %p", textInst->text.len, &textInst->text);
+			logInfo("debug main menu: swf_RenderEditTex_Hook:textInst: %p textInst->text.len: %d textInst->text add: %p", textInst, textInst->text.len, &textInst->text);
 			if (textInst->text.allocedAndFlag) {
 				strncpy(textInst->text.data, "Kaibz Mod", 9);
 				if (isFirstTimeDevString) {
