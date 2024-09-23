@@ -50,7 +50,7 @@
 #include "Wolf2/idKisculeNodeActionMidnightControlManager.h"
 #include "Wolf2/idCmdManager.h"
 #include "Wolf2/timescaleManager.h"
-#include "Debug/Debug.h"
+#include "Dbg/Debug.h"
 #include "Wolf2/MenuStateManager.h"
 #include "Wolf2/idConsoleLocalManager.h"
 #include "Wolf2/ImGuiManager.h"

@@ -192,7 +192,7 @@
     <ClInclude Include="Wolf2\BuildInfo.h" />
     <ClInclude Include="Loguru\CustomFileLogger.h" />
     <ClInclude Include="Wolf2\ADS_Manager.h" />
-    <ClInclude Include="Debug\ImGuiDebugWin.h" />
+    <ClInclude Include="Dbg\ImGuiDebugWin.h" />
     <ClInclude Include="Wolf2\idPlayerManager.h" />
     <ClInclude Include="Wolf2\idFocusTrackerManager.h" />
     <ClInclude Include="Wolf2\hudManager.h" />
@@ -205,7 +205,7 @@
     <ClInclude Include="Wolf2\cachedCvarsManager.h" />
     <ClInclude Include="Wolf2\customDotCrosshairManager.h" />
     <ClInclude Include="Wolf2\autoItemPickUpManager.h" />
-    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="Dbg\Debug.h" />
     <ClInclude Include="FileOp\FileOp.h" />
     <ClInclude Include="Json\nlohmann\json.hpp" />
     <ClInclude Include="Json\nlohmann\json_fwd.hpp" />
@@ -317,7 +317,7 @@
     <ClCompile Include="Wolf2\BuildInfo.cpp" />
     <ClCompile Include="Loguru\CustomFileLogger.cpp" />
     <ClCompile Include="Wolf2\ADS_Manager.cpp" />
-    <ClCompile Include="Debug\ImGuiDebugWin.cpp" />
+    <ClCompile Include="Dbg\ImGuiDebugWin.cpp" />
     <ClCompile Include="Wolf2\idPlayerManager.cpp" />
     <ClCompile Include="Wolf2\idFocusTrackerManager.cpp" />
     <ClCompile Include="Wolf2\hudManager.cpp" />
@@ -331,7 +331,7 @@
     <ClCompile Include="Wolf2\cachedCvarsManager.cpp" />
     <ClCompile Include="Wolf2\customDotCrosshairManager.cpp" />
     <ClCompile Include="Wolf2\autoItemPickUpManager.cpp" />
-    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="Dbg\Debug.cpp" />
     <ClCompile Include="FileOp\FileOp.cpp" />
     <ClCompile Include="Wolf2\idConsoleLocalManager.cpp" />
     <ClCompile Include="Wolf2\idRenderModelGuiManager.cpp" />

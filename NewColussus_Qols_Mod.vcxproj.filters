@@ -81,7 +81,7 @@
     <ClInclude Include="Wolf2\idKisculeNodeActionMidnightControlManager.h" />
     <ClInclude Include="Wolf2\timescaleManager.h" />
     <ClInclude Include="MemHelper\Patcher.h" />
-    <ClInclude Include="Debug\Debug.h" />
+    <ClInclude Include="Dbg\Debug.h" />
     <ClInclude Include="Wolf2\DefWindowProcW_Manager.h" />
     <ClInclude Include="Wolf2\ImGuiManager.h" />
     <ClInclude Include="Wolf2\idRenderModelGuiManager.h" />
@@ -95,7 +95,7 @@
     <ClInclude Include="Wolf2\customDotCrosshairManager.h" />
     <ClInclude Include="Wolf2\cachedCvarsManager.h" />
     <ClInclude Include="ModSettings\ModSettingsManager.h" />
-    <ClInclude Include="Debug\ImGuiDebugWin.h" />
+    <ClInclude Include="Dbg\ImGuiDebugWin.h" />
     <ClInclude Include="Wolf2\idResourceManager.h" />
     <ClInclude Include="Wolf2\idLightManager.h" />
     <ClInclude Include="Wolf2\ADS_Manager.h" />
@@ -179,7 +179,7 @@
     <ClCompile Include="Wolf2\idKisculeNodeActionMidnightControlManager.cpp" />
     <ClCompile Include="Wolf2\timescaleManager.cpp" />
     <ClCompile Include="MemHelper\Patcher.cpp" />
-    <ClCompile Include="Debug\Debug.cpp" />
+    <ClCompile Include="Dbg\Debug.cpp" />
     <ClCompile Include="Wolf2\DefWindowProcW_Manager.cpp" />
     <ClCompile Include="Wolf2\ImGuiManager.cpp" />
     <ClCompile Include="ImGui\dependencies\imgui\Imgui_Wolf2Test.cpp" />
@@ -192,7 +192,7 @@
     <ClCompile Include="Wolf2\cachedCvarsManager.cpp" />
     <ClCompile Include="ModSettings\ModSettingsManager.cpp" />
     <ClCompile Include="ModSettings\ModSettings.cpp" />
-    <ClCompile Include="Debug\ImGuiDebugWin.cpp" />
+    <ClCompile Include="Dbg\ImGuiDebugWin.cpp" />
     <ClCompile Include="Wolf2\idResourceManager.cpp" />
     <ClCompile Include="Wolf2\idLightManager.cpp" />
     <ClCompile Include="Wolf2\ADS_Manager.cpp" />

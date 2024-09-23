@@ -10,7 +10,7 @@
 #include "../dependencies/imgui/imgui_impl_win32.h"
 #include "../../Config/Config.h"
 #include "../dependencies/imgui/Imgui_Wolf2Test.cpp"
-#include "../../Debug/ImGuiDebugWin.h"
+#include "../../Dbg/ImGuiDebugWin.h"
 #include "../../Wolf2/autoItemPickUpManager.h"
 #include "../../Wolf2/idUsercmdGenLocalManager.h"
 #include "../../Wolf2/hudManager.h"
@@ -26,7 +26,7 @@
 #include "DebugGui.h"
 #include "hudExtrasGui.h"
 #include "../../Wolf2/idLightManager.h"
-#include "../../Debug/Debug.h"
+#include "../../Dbg/Debug.h"
 #include "liveStatsGui.h"
 
 
