@@ -79,6 +79,8 @@ std::wstring K_Utils::StandardKeyToStringW(DWORD VKey)
 	return name;
 }
 
+
+
 std::string K_Utils::wide_to_narrow(const std::wstring& wide_str)
 {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
